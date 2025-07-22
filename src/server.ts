@@ -17,7 +17,7 @@ import { webhookHandler } from './services/payments/payment.webhook';
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // ✅ Webhook route first — requires raw body
 app.post(
