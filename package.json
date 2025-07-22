@@ -1,18 +1,22 @@
 {
-  "name": "backEnd",
+  "name": "backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "dev": "tsx watch ./src/server.ts",
-    "build": "tsc",
-    "start": "node ./dist/server.js",
-    "gen": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "studio": "drizzle-kit studio",
-    "push": " drizzle-kit generate && drizzle-kit migrate",
-    "seed": "tsx src/drizzle/seed.ts"
+ "scripts": {
+  "dev": "tsx watch ./src/server.ts",
+  "build": "tsc",
+  "start": "node ./dist/server.js",
+  "prestart": "tsc", 
+  "gen": "drizzle-kit generate",
+  "migrate": "drizzle-kit migrate",
+  "studio": "drizzle-kit studio",
+  "push": "drizzle-kit generate && drizzle-kit migrate",
+  "seed": "tsx src/drizzle/seed.ts"
+
   },
+
+  
   "keywords": [],
   "author": "Gakenye Ndiritu",
   "license": "ISC",

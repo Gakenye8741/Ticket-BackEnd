@@ -17,7 +17,7 @@ import { webhookHandler } from './services/payments/payment.webhook';
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080; // ✅ Fallback for Azure compatibility
 
 // ✅ Webhook route first — requires raw body
 app.post(
@@ -27,16 +27,23 @@ app.post(
 );
 
 // ✅ Middlewares (after webhook)
-app.use(cors());
-app.use(express.json()); // ❗ Must come after webhook route
-app.use(logger); // custom logger middleware
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://ticketstream-events.netlify.app" // ✅ Added protocol for production origin
+  ],
+  credentials: true,
+}));
 
-// ✅ Default route
+app.use(express.json()); // Must be after webhook
+app.use(logger); // Custom logger middleware
+
+// ✅ Health check / default route
 app.get('/', (_req, res: Response) => {
-  res.send("🚀 Welcome to the Event Ticketing & Venue Booking System API (Drizzle + PostgreSQL Designed by Gakenye Ndiritu😎)");
+  res.send("🚀 Welcome to the Event Ticketing & Venue Booking System API (Drizzle + PostgreSQL) — Designed by Gakenye Ndiritu 😎");
 });
 
-// ✅ API routes
+// ✅ Route registration
 app.use('/api', authRouter);
 app.use('/api', userRouter);
 app.use('/api', TicketsRoute);
@@ -51,7 +58,7 @@ app.use('/api', responseRoute);
 // ✅ Start server
 app.listen(PORT, () => {
   console.log(`
-  🚀 Server running at: http://localhost:${PORT}
+  🚀 Server running on port: ${PORT}
   ✅ Event_Ticketing_&_Venue_Booking_System Backend Initialized!
   🛠️ Developed by: GAKENYE NDIRITU 😉😎
   `);
