@@ -1,0 +1,227 @@
+###
+GET http://localhost:5000/api/users
+
+###
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+ {
+    "nationalId": 41436942,
+    "firstName": "Gakenye",
+    "lastName": "Ndiritu",
+    "email": "codewithgakenye@gmail.com",
+    "password":"Gakenye123#",
+    "contactPhone": "+25412345678",
+    "address": "50 Nyeri",
+    "role":"admin"
+
+  }
+
+###
+POST http://localhost:5000/api/responses
+Content-Type: application/json
+
+{
+  "ticketId":"1" ,
+  "nationalId":41436942,
+  "message": "will work on that as soon as possible"
+}
+
+###
+GET http://localhost:5000/api/payments
+
+###
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+   "email": "codewithgakenye@gmail.com",
+    "password":"Gakenye123#"
+}
+###
+POST http://localhost:5000/api/bookings
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MTQyNjk0OCwiZW1haWwiOiJicmF5b2dha2VueWUwN0BnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImZpcnN0TmFtZSI6IkdBS0VOWUUxMjMiLCJsYXN0TmFtZSI6Ik5ESVJJVFUiLCJjb250YWN0UGhvbmUiOiIrMjU0MTIzNDU2NzgiLCJhZGRyZXNzIjoiNTAgTnllcmkiLCJleHAiOjE3NTIyNDQ3MTAsImlhdCI6MTc1MjI0MTExMH0.JoOd3GE-FBUIEQMhsq1XHGM61FhfNM3PLDRo1Sf8FRY
+Content-Type: application/json
+
+
+{
+  "nationalId": "41426948",
+  "eventId": 5,
+  "quantity": 2,
+  "totalAmount": 100,
+  "ticketTypeId": "2"
+}
+
+###
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+ {    
+    "email": "codewithgakenye@gmail.com",
+    "password":"Gakenye123#"  
+  }
+
+###
+GET http://localhost:5000/api/ticket-types/event/3
+
+###
+GET http://localhost:5000/api/events/user/123455678
+  
+###
+POST http://localhost:5000/api/events/purchase-by-title/Jazz Night Under the 
+Content-Type: application/json
+
+{
+  "quantity": 6
+}
+
+###
+GET http://localhost:5000/api/details/users-search?q=smith
+
+###
+GET http://localhost:5000/api/details/users-search?q=smith
+
+###
+GET http://localhost:5000/api/bookings/user/national-id/11223344
+###
+GET http://localhost:5000/api/payments
+###
+GET http://localhost:5000/api/bookings
+
+
+###
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{ 
+   "email": "admin@example.com",
+   "password": "password123"
+}
+###
+GET http://localhost:5000/api/users/21890879
+###
+GET http://localhost:5000/api/users/21890879/details
+###
+DELETE http://localhost:5000/api/users/13
+
+
+###
+GET http://localhost:5000/api/users
+
+###
+GET http://localhost:5000/api/users/41426948/details
+
+###
+GET http://localhost:5000/api/users-search?lastName=u
+
+###
+GET http://localhost:5000/api/tickets/2/details
+
+###
+PUT http://localhost:5000/api/venues/2
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MTQyNjk0MiwiZW1haWwiOiJicmF5b2dha2VueWVAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiZmlyc3ROYW1lIjoiR0FLRU5ZRSIsImxhc3ROYW1lIjoiTkRJUklUVSIsImNvbnRhY3RQaG9uZSI6IisyNTQxMjM0NTY3OCIsImFkZHJlc3MiOiI1MCBOeWVyaSIsImV4cCI6MTc1MjA1ODc1NywiaWF0IjoxNzUyMDU1MTU3fQ.O_GxZ1-T0-2ytCLMNvg4rpRYB6fgkaoi9V2TrF0-GCM
+Content-Type:application/json
+
+{
+    "name": "Sarit Expo Centre",
+    "address": "Westlands, Nairobi",
+    "capacity": 1503
+}
+
+###
+GET http://localhost:5000/api/venues/search?name=GA
+
+###
+GET http://localhost:5000/api/details/venues/search?name=g
+
+
+###
+DELETE http://localhost:5000/api/venues/4ererw
+
+###
+POST  http://localhost:5000/api/events
+Content-Type: application/json
+
+{
+  "title": "Nairobi Tech Meetup - July Edition",
+  "description": "Monthly gathering for developers and tech enthusiasts in Nairobi.",
+  "venueId": 2,
+  "category": "Technology",
+  "date": "2025-07-25",
+  "time": "18:30:00",
+  "ticketPrice": 15.00,
+  "ticketsTotal": 120
+}
+
+###
+GET  http://localhost:5000/api/bookings
+
+###
+POST   http://localhost:5000/api/bookings
+Content-Type: application/json
+
+{
+  "userId": 1,        
+  "eventId": 5,      
+  "quantity": 2,      
+  "totalAmount": 30.00, 
+  "bookingStatus": "Confirmed" 
+}
+
+###
+GET http://localhost:5000/api/bookings
+
+###
+GET  http://localhost:5000/api/payments
+
+
+
+####
+Content-Type: application/json
+
+{
+  "bookingId": 3,         
+  "amount": 30.00,  
+  "paymentStatus": "Completed", 
+  "paymentMethod": "M-Pesa",  
+  "transactionId": "TXN123456789" 
+}
+
+###
+DELETE http://localhost:5000/api/auth/register/11
+
+
+###
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "nationalId": 21890879,
+  "firstName": "Brian",
+  "lastName": "Gakenye",
+  "email": "codewithgakenye@gmail.com",
+  "password": "password3" ,
+  "contactPhone": "0112310754",
+  "address": "BOX 1000 Nyeri"
+}
+
+###
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  
+  "email": "codewithgakenye1@gmail.com",
+  "password": "password3" 
+}
+
+# Create a new user
+
+
+
+
+
+
+
+
+
