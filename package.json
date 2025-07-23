@@ -5,13 +5,14 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch ./src/server.ts",
-    "build": "tsc && drizzle-kit generate",
+    "build": "tsc",
     "start": "node dist/server.js",
     "gen": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
+    "migrate": "tsx src/drizzle/migrate.ts",
     "studio": "drizzle-kit studio",
-    "push": "drizzle-kit generate && drizzle-kit migrate",
-    "seed": "tsx src/drizzle/seed.ts"
+    "push": "drizzle-kit generate && drizzle-kit push",
+    "seed": "tsx src/drizzle/seed.ts",
+    "postinstall": "tsc"
   },
   "keywords": [],
   "author": "Gakenye Ndiritu",
