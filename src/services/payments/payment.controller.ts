@@ -245,8 +245,8 @@ export const createCheckoutSession: RequestHandler = async (req, res): Promise<v
         nationalId: nationalId.toString(),
         bookingId: bookingId.toString(),
       },
-      success_url: "http://localhost:5173/Dashboard/MyBookings",
-      cancel_url: "http://localhost:5173/",
+      success_url: "https://ticketstream-events.netlify.app/dashboard/MyBookings",
+      cancel_url: "https://ticketstream-events.netlify.app/events",
     });
 
     res.status(200).json({ url: session.url });
