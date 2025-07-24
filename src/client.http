@@ -1,15 +1,15 @@
 ###
-GET http://localhost:5000/api/users
+GET http://localhost:5000/api/events
 
 ###
 POST http://localhost:5000/api/auth/register
 Content-Type: application/json
 
  {
-    "nationalId": 41436942,
+    "nationalId": 41436943,
     "firstName": "Gakenye",
     "lastName": "Ndiritu",
-    "email": "codewithgakenye@gmail.com",
+    "email": "codewithgakenye1@gmail.com",
     "password":"Gakenye123#",
     "contactPhone": "+25412345678",
     "address": "50 Nyeri",
