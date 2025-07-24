@@ -231,7 +231,7 @@ export const createCheckoutSession: RequestHandler = async (req, res): Promise<v
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "ksh",
             unit_amount: amount, // amount in cents
             product_data: {
               name: "Ticket Booking Payment",
