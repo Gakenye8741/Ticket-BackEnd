@@ -2,6 +2,15 @@
 GET http://localhost:5000/api/events
 
 ###
+POST http://localhost:5000/api/auth/password-reset
+Content-Type: application/json
+
+{
+  "email": "brayogakenye04@gmail.com"
+}
+
+
+###
 POST http://localhost:5000/api/auth/register
 Content-Type: application/json
 
