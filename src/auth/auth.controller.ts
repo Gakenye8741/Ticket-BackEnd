@@ -56,14 +56,14 @@ export const registerUser: RequestHandler = async (req, res) => {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
         <h2 style="color: #093FB4;">Welcome, ${user.firstName} ${user.lastName}!</h2>
-        <p>Thank you for registering with our <strong>Medical Appointment & Patient Management System</strong>.</p>
+        <p>Thank you for registering with our <strong>TicketStream Events And Ticketing System</strong>.</p>
         <p>Your verification code is:</p>
         <div style="background-color: #eef3fc; padding: 10px; border-radius: 6px; text-align: center; font-size: 20px; font-weight: bold; color: #093FB4;">
         ${newUserPayload.confirmationCode}
         </div>
         <p>Please enter this code to verify your email and activate your account.</p>
         <p style="color: #777;">If you did not create this account, please ignore this email.</p>
-        <p style="margin-top: 30px;">Thank you,<br><strong>The Medical Services Team</strong></p>
+        <p style="margin-top: 30px;">Thank you,<br><strong>The TicketStream ICT Team</strong></p>
       </div>
     `;
 
