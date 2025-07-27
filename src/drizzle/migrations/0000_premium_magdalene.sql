@@ -89,16 +89,19 @@ CREATE TABLE "ticketTypes" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"nationalId" integer PRIMARY KEY NOT NULL,
-	"firstName" varchar(15) NOT NULL,
-	"lastName" varchar(15) NOT NULL,
+	"nationalId" serial PRIMARY KEY NOT NULL,
+	"firstName" varchar(255) NOT NULL,
+	"lastName" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,
-	"password" text NOT NULL,
-	"contactPhone" varchar(15),
+	"emailVerified" boolean DEFAULT false NOT NULL,
+	"confirmationCode" varchar(255) DEFAULT '',
+	"password" varchar(255) NOT NULL,
+	"contactPhone" varchar(20),
 	"address" text,
+	"profileImageUrl" text,
 	"role" "role" DEFAULT 'user' NOT NULL,
-	"createdAt" timestamp DEFAULT now() NOT NULL,
-	"updatedAt" timestamp DEFAULT now() NOT NULL,
+	"createdAt" timestamp DEFAULT now(),
+	"updatedAt" timestamp DEFAULT now(),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint

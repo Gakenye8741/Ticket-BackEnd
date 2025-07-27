@@ -1,5 +1,5 @@
 {
-  "id": "4343dc27-6bf8-4d57-8171-3f08c9c26e6a",
+  "id": "591cd4a6-bac1-4c06-b42b-9de3b529a383",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -655,19 +655,19 @@
       "columns": {
         "nationalId": {
           "name": "nationalId",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
         "firstName": {
           "name": "firstName",
-          "type": "varchar(15)",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
         "lastName": {
           "name": "lastName",
-          "type": "varchar(15)",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
@@ -677,20 +677,40 @@
           "primaryKey": false,
           "notNull": true
         },
+        "emailVerified": {
+          "name": "emailVerified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "confirmationCode": {
+          "name": "confirmationCode",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "''"
+        },
         "password": {
           "name": "password",
-          "type": "text",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
         },
         "contactPhone": {
           "name": "contactPhone",
-          "type": "varchar(15)",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false
         },
         "address": {
           "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profileImageUrl": {
+          "name": "profileImageUrl",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -707,14 +727,14 @@
           "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "now()"
         },
         "updatedAt": {
           "name": "updatedAt",
           "type": "timestamp",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "default": "now()"
         }
       },

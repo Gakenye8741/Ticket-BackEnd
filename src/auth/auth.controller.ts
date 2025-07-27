@@ -1,37 +1,33 @@
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
+import {
+  getUserByEmailService,
+  getUserById,
+  registerUserService,
+  updateUserPasswordService,
+  updateVerificationStatusService,
+} from "./auth.service";
+import {
+  registerUserValidator,
+  userLogInValidator,
+} from "../validators/user.validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { z } from "zod";
+import { sendNotificationEmail } from "../../src/middleware/googleMailer";
 
-import {
-  createUserServices,
-  getUserByEmailService,
-  getUserByIdService,
-  updateUserPasswordService,
-  // verifyUserEmailService,
-} from "./auth.service";
+// Generate 6-digit code
+const generateConfirmationCode = () => Math.floor(100000 + Math.random() * 900000);
 
-import {
-  registerSchema,
-  loginSchema,
-  passwordResetRequestSchema,
-  passwordUpdateSchema,
-} from "../validators/user.validator";
-
-import { sendEmails } from "../middleware/googleMailer";
-
-// REGISTER USER
-export const registerUser = async (req: Request, res: Response) => {
+// Register
+export const registerUser: RequestHandler = async (req, res) => {
   try {
-    const result = registerSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(400).json({ error: result.error.issues });
+    const parseResult = registerUserValidator.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: parseResult.error.issues });
       return;
     }
 
-    const user = result.data;
+    const user = parseResult.data;
     const existingUser = await getUserByEmailService(user.email);
-
     if (existingUser) {
       res.status(400).json({ error: "User with this email already exists" });
       return;
@@ -39,204 +35,193 @@ export const registerUser = async (req: Request, res: Response) => {
 
     const salt = bcrypt.genSaltSync(10);
     const hashedPassword = bcrypt.hashSync(user.password, salt);
-    user.password = hashedPassword;
 
-    const newUser = await createUserServices(user);
+    const newUserPayload = {
+      ...user,
+      password: hashedPassword,
+      confirmationCode: generateConfirmationCode().toString(),
+      nationalId: Math.floor(100000000 + Math.random() * 900000000),
+      emailVerified: false,
+      profileImageUrl: null,
+      contactPhone: user.contactPhone || null,
+      address: user.address || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    const fullName = `${user.firstName} ${user.lastName}`;
-    const emailNotification = await sendEmails(
-      user.email,
-      fullName,
-      "Account Created Successfully 🌟",
-      "Welcome to our event and tickets Management System!",
-      user.lastName
-    );
+    const newUser = await registerUserService(newUserPayload);
+
+    const subject = "Account Created Successfully";
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; background-color: #f9f9f9; padding: 20px; border-radius: 8px;">
+        <h2 style="color: #093FB4;">Welcome, ${user.firstName} ${user.lastName}!</h2>
+        <p>Thank you for registering with our <strong>Medical Appointment & Patient Management System</strong>.</p>
+        <p>Your verification code is:</p>
+        <div style="background-color: #eef3fc; padding: 10px; border-radius: 6px; text-align: center; font-size: 20px; font-weight: bold; color: #093FB4;">
+        ${newUserPayload.confirmationCode}
+        </div>
+        <p>Please enter this code to verify your email and activate your account.</p>
+        <p style="color: #777;">If you did not create this account, please ignore this email.</p>
+        <p style="margin-top: 30px;">Thank you,<br><strong>The Medical Services Team</strong></p>
+      </div>
+    `;
+
+    const emailSent = await sendNotificationEmail(user.email, subject, user.firstName, html);
+
+    if (!emailSent) {
+      res.status(500).json({ error: "User created but failed to send notification email" });
+      return;
+    }
 
     res.status(201).json({
-      message: "User created successfully ✅",
+      message: "User registered successfully. Please verify your email.",
       user: newUser,
-      emailNotification,
     });
   } catch (error: any) {
-    console.error("Register error:", error.message);
     res.status(500).json({ error: error.message || "Failed to register user" });
   }
 };
 
-// LOGIN USER
-export const loginUser = async (req: Request, res: Response) => {
+// Login
+export const loginUser: RequestHandler = async (req, res) => {
   try {
-    const result = loginSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(400).json({ error: result.error.issues });
+    const parseResult = userLogInValidator.safeParse(req.body);
+    if (!parseResult.success) {
+      res.status(400).json({ error: "Invalid input", details: parseResult.error });
       return;
     }
 
-    const { email, password } = result.data;
-    const user = await getUserByEmailService(email);
-
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
+    const user = parseResult.data;
+    const userExists = await getUserByEmailService(user.email);
+    if (!userExists) {
+      res.status(404).json({ error: "User does not exist" });
       return;
     }
 
-    const isMatch = bcrypt.compareSync(password, user.password);
+    if (!userExists.emailVerified) {
+      res.status(403).json({ error: "Please verify your email." });
+      return;
+    }
+
+    const isMatch = bcrypt.compareSync(user.password, userExists.password!);
     if (!isMatch) {
       res.status(401).json({ error: "Invalid password" });
       return;
     }
 
     const payload = {
-      nationalId: user.nationalId,
-      email: user.email,
-      role: user.role,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      contactPhone: user.contactPhone,
-      address: user.address,
+      nationalId: userExists.nationalId,
+      userEmail: userExists.email,
+      role: userExists.role,
       exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
     };
 
-    const secret = process.env.JWT_SECRET as string;
-    const token = jwt.sign(payload, secret);
+    const token = jwt.sign(payload, process.env.JWT_SECRET!);
 
     res.status(200).json({
       token,
-      ...payload,
+      nationalId: userExists.nationalId,
+      email: userExists.email,
+      role: userExists.role,
+      message: "Login successful 😎",
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
 };
 
-// PASSWORD RESET REQUEST
-export const passwordReset = async (req: Request, res: Response) => {
+// Forgot Password
+export const passwordReset: RequestHandler = async (req, res) => {
   try {
-    const result = passwordResetRequestSchema.safeParse(req.body);
-    if (!result.success) {
-      res.status(400).json({ error: result.error.issues });
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: "Email is required" });
       return;
     }
 
-    const { email } = result.data;
     const user = await getUserByEmailService(email);
-
-    // Always respond the same for security reasons
     if (!user) {
-      res.status(200).json({ message: "If an account exists, a reset link has been sent." });
+      res.status(404).json({ error: "User not found" });
       return;
     }
 
     const resetToken = jwt.sign(
-      { nationalId: user.nationalId, purpose: "password_reset" },
-      process.env.JWT_SECRET as string,
+      { nationalId: user.nationalId },
+      process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}reset-password/${resetToken}`;
+    const html = `Click the link to reset your password: <a href="${resetLink}">Reset Password</a>`;
 
-    const results = await sendEmails(
-      email,
-      `${user.firstName} ${user.lastName}`,
-      "Password Reset",
-      `Click here to reset your password: <a href="${resetLink}">Reset Password</a>`,
-      user.lastName
-    );
-
+    const results = await sendNotificationEmail(email, "Password Reset", user.firstName, html);
     if (!results) {
       res.status(500).json({ error: "Failed to send reset email" });
       return;
     }
 
-    res.status(200).json({
-      message: "Password reset email sent",
-      resetToken,
-    });
+    res.status(200).json({ message: "Password reset email sent successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to reset password" });
   }
 };
 
-// UPDATE PASSWORD
-export const updatePassword = async (req: Request, res: Response) => {
+// Update Password
+export const updatePassword: RequestHandler = async (req, res) => {
   try {
     const { token } = req.params;
-    const result = passwordUpdateSchema.safeParse(req.body);
+    const { password } = req.body;
 
-    if (!result.success) {
-      res.status(400).json({ error: result.error.issues });
+    if (!token || !password) {
+      res.status(400).json({ error: "Token and password are required" });
       return;
     }
 
-    const { newPassword } = result.data;
-
-    const payload: any = jwt.verify(token, process.env.JWT_SECRET as string);
-
-    if (payload.purpose !== "password_reset") {
-      res.status(400).json({ error: "Invalid token purpose" });
-      return;
-    }
-
-    const user = await getUserByIdService(payload.nationalId);
+    const payload: any = jwt.verify(token, process.env.JWT_SECRET!);
+    const user = await getUserById(payload.nationalId);
     if (!user) {
       res.status(404).json({ error: "User not found" });
       return;
     }
 
-    const hashed = bcrypt.hashSync(newPassword, 10);
-    await updateUserPasswordService(user.email, hashed);
+    const hashedPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+    await updateUserPasswordService(user.email!, hashedPassword);
 
-    await sendEmails(
-      user.email,
-      `${user.firstName} ${user.lastName}`,
-      "Password Reset Success",
-      "Your password has been updated successfully.",
-      user.lastName
-    );
-
-    res.status(200).json({ message: "Password updated successfully" });
+    res.status(200).json({ message: "Password has been reset successfully" });
   } catch (error: any) {
-    if (error instanceof jwt.TokenExpiredError) {
-      res.status(401).json({ error: "Token expired" });
-      return;
-    }
-    if (error instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({ error: "Invalid token" });
-      return;
-    }
-    res.status(500).json({ error: error.message || "Password update failed" });
+    res.status(500).json({ error: error.message || "Invalid or expired token" });
   }
 };
 
-// EMAIL VERIFICATION
-export const verifyEmail = async (req: Request, res: Response) => {
+// Email Verification
+export const emailVerfication: RequestHandler = async (req, res) => {
   try {
-    const { token } = req.params;
-    const payload: any = jwt.verify(token, process.env.JWT_SECRET as string);
+    const { email, confirmationCode } = req.body;
 
-    if (payload.purpose !== "email_verification") {
-      res.status(400).json({ error: "Invalid token purpose" });
-      return;
-    }
-
-    const user = await getUserByIdService(payload.nationalId);
+    const user = await getUserByEmailService(email);
     if (!user) {
       res.status(404).json({ error: "User not found" });
       return;
     }
 
-    // await verifyUserEmailService(user.nationalId);
+    if (user.confirmationCode !== confirmationCode) {
+      res.status(400).json({ error: "Invalid Confirmation code" });
+      return;
+    }
+
+    const updatedUser = await updateVerificationStatusService(
+      user.email!,
+      true,
+      null
+    );
+
+    if (!updatedUser) {
+      res.status(500).json({ error: "Failed to update verification status" });
+      return;
+    }
 
     res.status(200).json({ message: "Email verified successfully" });
   } catch (error: any) {
-    if (error instanceof jwt.TokenExpiredError) {
-      res.status(401).json({ error: "Verification link expired" });
-      return;
-    }
-    if (error instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({ error: "Invalid token" });
-      return;
-    }
-    res.status(500).json({ error: error.message || "Failed to verify email" });
+    res.status(500).json({ error: error.message || "Email verification failed" });
   }
 };

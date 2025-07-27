@@ -1,68 +1,66 @@
-import nodemailer from 'nodemailer';
+import nodeMailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
-export const sendEmails = async (
-  email: string,
-  subject: string,
-  message: string,
-  firstName: string,
-  lastName: string
-): Promise<string> => {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      host: 'smtp.gmail.com',
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_SENDER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+export const sendNotificationEmail = async (email: string, subject: string, firstName: string | null, message: string, html?: string) => {
+    try {
+        const transporter = nodeMailer.createTransport({
+            service: "gmail",
+            host: "smtp.gmail.com",
+            secure: true,
+            auth: {
+                user: process.env.EMAIL_SENDER,
+                pass: process.env.EMAIL_PASSWORD,
+        },
+        });
 
-    const mailOptions = {
-      from: `"Your App Name" <${process.env.EMAIL_SENDER}>`,
-      to: email,
-      subject,
-      text: `${message}`,
-      html: `
-        <html>
-          <head>
+        const mailOptions = {
+            from: process.env.EMAIL_SENDER, // sender address
+            to: email,
+            subject: subject, // Subject line
+            text: `${message}\n`, // plain text body
+            html: `<html>
+            <head>
             <style>
-              .email-container {
-                font-family: Arial, sans-serif;
-                background-color: #f9f9f9;
-                padding: 20px;
-                border-radius: 5px;
-                color: #333;
-              }
-              .header {
-                font-size: 20px;
-                font-weight: bold;
-                margin-bottom: 10px;
-              }
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    color: #333;
+                }
+                .email-container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                h2 {
+                    color: #333;
+                }
+                p {
+                    line-height: 1.6;
+                    margin: 10px 0;
+                }
             </style>
-          </head>
-          <body>
-            <div class="email-container">
-              <div class="header">${subject}</div>
-              <p>Hello ${firstName} ${lastName},</p>
-              <p>${message}</p>
-            </div>
-          </body>
-        </html>
-      `,
-    };
+            </head>
+            <body>
+                    <p>${message}</p>
+                </div>
+            <body>`
+        }
 
-    const mailRes = await transporter.sendMail(mailOptions);
+        const mailResponse = await transporter.sendMail(mailOptions);
+        
+        if (mailResponse.accepted.length > 0) {
+            return "Notification email sent successfully";
+        }else if (mailResponse.rejected.length > 0) {
+            return "Notification email not sent, please try again";
+        }else{
+            return "Email server error"
+        }
 
-    if (mailRes.accepted.length > 0) {
-      return 'Notification email sent successfully';
-    } else if (mailRes.rejected.length > 0) {
-      return 'Notification email not sent, please try again';
-    } else {
-      return 'Email server error';
+    } catch (error) {
+        return `Email server error ${error}`;
     }
-  } catch (error) {
-    console.error('Email sending error:', error);
-    return 'Email server error';
-  }
-};
+}

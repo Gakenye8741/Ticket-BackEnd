@@ -1,4 +1,5 @@
-import { sendEmails } from "./googleMailer"; // adjust path if needed
+import { sendNotificationEmail } from "./googleMailer";
+
 
 interface TicketInfo {
   email: string;
@@ -46,7 +47,7 @@ Booking Date: ${new Date(ticket.bookingDate).toLocaleString()}
       </div>
     `;
 
-    const result = await sendEmails(
+    const result = await sendNotificationEmail(
       ticket.email,
       subject,
       plainMessage,

@@ -1,139 +1,18 @@
-// // auth.validator.ts
-// import { z } from "zod";
-// import { roleEnum } from "../drizzle/schema";
-
-// // Exact schema-matching validations
-// export const registerSchema = z.object({
-//   firstName: z.string()
-//     .min(1, "First name is required")
-//     .max(100, "First name cannot exceed 100 characters"),
-//   lastName: z.string()
-//     .min(1, "Last name is required")
-//     .max(100, "Last name cannot exceed 100 characters"),
-//   email: z.string()
-//     .email("Invalid email format")
-//     .max(255, "Email cannot exceed 255 characters"),
-//   password: z.string()
-//     .min(1, "Password is required")
-//     .max(255, "Password cannot exceed 255 characters"),
-//   contactPhone: z.string()
-//     .max(20, "Contact phone cannot exceed 20 characters")
-//     .optional(),
-//   address: z.string()
-//     .max(255, "Address cannot exceed 255 characters")
-//     .optional(),
-//   role: z.enum(roleEnum.enumValues).default('user')
-// }).strict();
-
-// export const loginSchema = z.object({
-//   email: z.string()
-//     .email("Invalid email format")
-//     .max(255, "Email cannot exceed 255 characters"),
-//   password: z.string()
-//     .min(1, "Password is required")
-//     .max(255, "Password cannot exceed 255 characters")
-// }).strict();
-
-// export const passwordResetRequestSchema = z.object({
-//   email: z.string()
-//     .email("Invalid email format")
-//     .max(255, "Email cannot exceed 255 characters")
-// }).strict();
-
-// export const passwordUpdateSchema = z.object({
-//   token: z.string().min(1, "Token is required"),
-//   newPassword: z.string()
-//     .min(1, "Password is required")
-//     .max(255, "Password cannot exceed 255 characters"),
-//   confirmPassword: z.string()
-//     .min(1, "Please confirm your password")
-// }).strict()
-// .refine(data => data.newPassword === data.confirmPassword, {
-//   message: "Passwords don't match",
-//   path: ["confirmPassword"]
-// });
-
-
-
-// // Type exports matching your schema
-// export type RegisterInput = z.infer<typeof registerSchema>;
-// export type LoginInput = z.infer<typeof loginSchema>;
-// export type PasswordResetRequestInput = z.infer<typeof passwordResetRequestSchema>;
-// export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>;
-
-// auth.validator.ts
 import { z } from "zod";
-import { roleEnum } from "../drizzle/schema";
 
-// Exact schema-matching validations
-export const registerSchema = z.object({
-  nationalId: z.number({
-    required_error: "National ID is required",
-    invalid_type_error: "National ID must be a number",
-  }).refine((val) => val.toString().length >= 7 && val.toString().length <= 10, {
-    message: "National ID must be between 7 and 10 digits",
-  }),
-
-  firstName: z.string()
-    .min(1, "First name is required")
-    .max(100, "First name cannot exceed 100 characters"),
-
-  lastName: z.string()
-    .min(1, "Last name is required")
-    .max(100, "Last name cannot exceed 100 characters"),
-
-  email: z.string()
-    .email("Invalid email format")
-    .max(255, "Email cannot exceed 255 characters"),
-
-  password: z.string()
-    .min(1, "Password is required")
-    .max(255, "Password cannot exceed 255 characters"),
-
-  contactPhone: z.string()
-    .max(20, "Contact phone cannot exceed 20 characters")
-    .optional(),
-
-  address: z.string()
-    .max(255, "Address cannot exceed 255 characters")
-    .optional(),
-
-  role: z.enum(roleEnum.enumValues).default("user")
-}).strict();
-
-export const loginSchema = z.object({
-  email: z.string()
-    .email("Invalid email format")
-    .max(255, "Email cannot exceed 255 characters"),
-
-  password: z.string()
-    .min(1, "Password is required")
-    .max(255, "Password cannot exceed 255 characters")
-}).strict();
-
-export const passwordResetRequestSchema = z.object({
-  email: z.string()
-    .email("Invalid email format")
-    .max(255, "Email cannot exceed 255 characters")
-}).strict();
-
-export const passwordUpdateSchema = z.object({
-  token: z.string().min(1, "Token is required"),
-
-  newPassword: z.string()
-    .min(1, "Password is required")
-    .max(255, "Password cannot exceed 255 characters"),
-
-  confirmPassword: z.string()
-    .min(1, "Please confirm your password")
-}).strict().refine(data => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
+export const registerUserValidator = z.object({
+    firstName: z.string().min(2, "First name must be at least 2 characters long"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters long"),
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(6, "Password must be at least 6 characters long"),
+    contactPhone: z.string().min(10, "Contact phone must be at least 10 characters long"),
+    address: z.string().optional(),
+    role: z.enum(["user", "admin"]).default("user"),
+    confirmationCode: z.string().optional(),
+    
 });
 
-
-// Type exports matching your schema
-export type RegisterInput = z.infer<typeof registerSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
-export type PasswordResetRequestInput = z.infer<typeof passwordResetRequestSchema>;
-export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>;
+export const userLogInValidator = z.object({
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(2, "Password must be at least 6 characters long")
+});

@@ -9,6 +9,7 @@ import {
   date,
   time,
   pgEnum,
+  boolean
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -30,16 +31,19 @@ export const priorityEnum = pgEnum("priority", ["Low", "Medium", "High"]);
 // =======================
 
 export const users = pgTable("users", {
-  nationalId: integer("nationalId").primaryKey(),
-  firstName: varchar("firstName", { length: 15 }).notNull(),
-  lastName: varchar("lastName", { length: 15 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull().unique(),
-  password: text("password").notNull(),
-  contactPhone: varchar("contactPhone", { length: 15 }),
-  address: text("address"),
-  role: roleEnum("role").default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+    nationalId: serial("nationalId").primaryKey(),
+    firstName: varchar("firstName", { length: 255 }).notNull(),
+    lastName: varchar("lastName", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    emailVerified: boolean("emailVerified").notNull().default(false),
+    confirmationCode: varchar("confirmationCode", { length: 255 }).default(""),
+    password: varchar("password", { length: 255 }).notNull(),
+    contactPhone: varchar("contactPhone", { length: 20 }),
+    address: text("address"),
+    profileImageUrl: text("profileImageUrl"),
+    role: roleEnum("role").notNull().default("user"),
+    createdAt: timestamp("createdAt").defaultNow(),
+    updatedAt: timestamp("updatedAt").defaultNow(),
 });
 
 // =======================
