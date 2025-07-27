@@ -114,6 +114,7 @@ export const loginUser: RequestHandler = async (req, res) => {
       nationalId: userExists.nationalId,
       userEmail: userExists.email,
       role: userExists.role,
+      firstName: userExists.firstName,
       exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
     };
 
@@ -124,6 +125,7 @@ export const loginUser: RequestHandler = async (req, res) => {
       nationalId: userExists.nationalId,
       email: userExists.email,
       role: userExists.role,
+      firstName: userExists.firstName,
       message: "Login successful 😎",
     });
   } catch (error: any) {

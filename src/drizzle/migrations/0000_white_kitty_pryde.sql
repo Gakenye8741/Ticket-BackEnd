@@ -89,7 +89,7 @@ CREATE TABLE "ticketTypes" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"nationalId" serial PRIMARY KEY NOT NULL,
+	"nationalId" integer PRIMARY KEY NOT NULL,
 	"firstName" varchar(255) NOT NULL,
 	"lastName" varchar(255) NOT NULL,
 	"email" varchar(255) NOT NULL,

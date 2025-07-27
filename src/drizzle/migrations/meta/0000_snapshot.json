@@ -1,5 +1,5 @@
 {
-  "id": "591cd4a6-bac1-4c06-b42b-9de3b529a383",
+  "id": "ae7f4f85-a0e9-4165-aa87-5479d773e292",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -655,7 +655,7 @@
       "columns": {
         "nationalId": {
           "name": "nationalId",
-          "type": "serial",
+          "type": "integer",
           "primaryKey": true,
           "notNull": true
         },

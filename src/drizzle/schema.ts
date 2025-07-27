@@ -31,7 +31,7 @@ export const priorityEnum = pgEnum("priority", ["Low", "Medium", "High"]);
 // =======================
 
 export const users = pgTable("users", {
-    nationalId: serial("nationalId").primaryKey(),
+    nationalId: integer("nationalId").primaryKey(),
     firstName: varchar("firstName", { length: 255 }).notNull(),
     lastName: varchar("lastName", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
