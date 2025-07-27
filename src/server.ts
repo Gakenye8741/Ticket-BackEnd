@@ -13,6 +13,7 @@ import { ticketRouter } from './services/TicketType/ticket.route';
 import mediaRouter from './services/media/media.route';
 import responseRoute from './services/AdminResponses/response.route';
 import { webhookHandler } from './services/payments/payment.webhook';
+import sendTicketEmailRoute from './middleware/emailTicket'
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use('/api', paymentRouter);
 app.use('/api', ticketRouter);
 app.use('/api', mediaRouter);
 app.use('/api', responseRoute);
+app.use('/api', sendTicketEmailRoute);
 
 // ✅ Start server
 app.listen(PORT, () => {
