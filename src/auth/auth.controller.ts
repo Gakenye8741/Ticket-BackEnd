@@ -12,7 +12,8 @@ import {
 } from "../validators/user.validator";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { sendNotificationEmail } from "../../src/middleware/googleMailer";
+import { sendNotificationEmail } from "../middleware/googleMailer";
+
 
 // Generate 6-digit code
 const generateConfirmationCode = () => Math.floor(100000 + Math.random() * 900000);
