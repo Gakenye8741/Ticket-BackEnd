@@ -1,3 +1,4 @@
+// send-ticket-email.ts
 import express from 'express';
 import nodemailer from 'nodemailer';
 
@@ -13,7 +14,9 @@ interface TicketType {
 
 interface Booking {
   bookingId: string;
-  eventId: string;
+  event: {
+    title: string;
+  };
   ticketType?: TicketType;
   quantity: number;
   paymentStatus?: string;
@@ -44,7 +47,7 @@ router.post('/send-ticket-email', async (req, res) => {
     const htmlContent = generateTicketEmailHtml(bookings, user);
 
     await transporter.sendMail({
-      from: '"Ticket Stream" <${process.env.EMAIL_SENDER}>',
+      from: `"Ticket Stream" <${process.env.EMAIL_SENDER}>`,
       to: user.email,
       subject: 'Your Event Tickets',
       html: htmlContent,
@@ -65,11 +68,12 @@ function generateTicketEmailHtml(bookings: Booking[], user: User): string {
     <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
       <h2>Hello ${user.firstName} ${user.lastName},</h2>
       <p>Thank you for your booking. Here are your ticket details:</p>
+
       ${bookings
         .map(
           (booking) => `
         <div style="border:1px solid #ddd;padding:16px;margin:16px 0;border-radius:8px;">
-          <h3 style="color:#4f46e5;">🎫 Event ID: ${booking.eventId}</h3>
+          <h3 style="color:#4f46e5;">🎫 ${booking.event?.title || 'Event'}</h3>
           <p><strong>Ticket Type:</strong> ${booking.ticketType?.name || 'N/A'}</p>
           <p><strong>Quantity:</strong> ${booking.quantity}</p>
           <p><strong>Price per ticket:</strong> $${parseFloat(booking.ticketType?.price || '0').toFixed(2)}</p>
@@ -80,6 +84,7 @@ function generateTicketEmailHtml(bookings: Booking[], user: User): string {
       `
         )
         .join('')}
+
       <p style="margin-top:24px;">We look forward to seeing you at the event!</p>
       <p>Best regards,<br/>Event Team</p>
     </div>
