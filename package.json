@@ -29,7 +29,10 @@
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.1",
     "drizzle-orm": "^0.43.1",
+    "file-saver": "^2.0.5",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.1",
+    "jspdf-autotable": "^5.0.2",
     "multer": "^2.0.1",
     "nodemailer": "^7.0.3",
     "pg": "^8.16.0",
@@ -43,6 +46,7 @@
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "^5.0.2",
+    "@types/file-saver": "^2.0.7",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.15.21",
     "@types/nodemailer": "^6.4.17",

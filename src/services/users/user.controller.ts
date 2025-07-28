@@ -122,27 +122,38 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
-// Update user by nationalId
+/// Update user by nationalId (partial update allowed)
 export const updateUser = async (req: Request, res: Response) => {
+  console.log(req.body);
   const nationalId = parseInt(req.params.nationalId);
   if (isNaN(nationalId)) {
-    res.status(400).json({ error: "Invalid national ID" });
-    return;
+    return res.status(400).json({ error: "Invalid national ID" });
   }
 
-  const { firstName, lastName, email, password } = req.body;
-  if (!firstName || !lastName || !email || !password) {
-    res.status(400).json({ error: "All fields are required" });
-    return;
-  }
+  // Extract possible fields from the request body
+  const { firstName, lastName, email, password, profileImageUrl, role } = req.body;
 
+  // Build the update object dynamically
+  const updates: any = {};
+  if (firstName !== undefined) updates.firstName = firstName;
+  if (lastName !== undefined) updates.lastName = lastName;
+  if (email !== undefined) updates.email = email;
+  if (password !== undefined) updates.password = password;
+  if (profileImageUrl !== undefined) updates.profileImageUrl = profileImageUrl;
+  if (role !== undefined) updates.role = role;
+
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ error: "No valid fields provided for update" });
+  }
+  console.log(profileImageUrl);
   try {
-    const result = await updateUserService(nationalId, { firstName, lastName, email, password });
-    res.status(200).json({ message: result });
+    const result = await updateUserService(nationalId, updates);
+    return res.status(200).json({ message: result, updatedFields: updates });
   } catch (error: any) {
-    res.status(500).json({ error: error.message || "Failed to update user" });
+    return res.status(500).json({ error: error.message || "Failed to update user" });
   }
 };
+
 // Update user by nationalId
 export const updateAdminUser = async (req: Request, res: Response) => {
   const nationalId = parseInt(req.params.nationalId);
