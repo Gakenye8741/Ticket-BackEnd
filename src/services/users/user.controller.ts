@@ -127,7 +127,8 @@ export const updateUser = async (req: Request, res: Response) => {
   console.log(req.body);
   const nationalId = parseInt(req.params.nationalId);
   if (isNaN(nationalId)) {
-    return res.status(400).json({ error: "Invalid national ID" });
+   res.status(400).json({ error: "Invalid national ID" });
+    return 
   }
 
   // Extract possible fields from the request body
@@ -143,14 +144,17 @@ export const updateUser = async (req: Request, res: Response) => {
   if (role !== undefined) updates.role = role;
 
   if (Object.keys(updates).length === 0) {
-    return res.status(400).json({ error: "No valid fields provided for update" });
+    res.status(400).json({ error: "No valid fields provided for update" });
+     return;
   }
   console.log(profileImageUrl);
   try {
     const result = await updateUserService(nationalId, updates);
-    return res.status(200).json({ message: result, updatedFields: updates });
+     res.status(200).json({ message: result, updatedFields: updates });
+     return
   } catch (error: any) {
-    return res.status(500).json({ error: error.message || "Failed to update user" });
+     res.status(500).json({ error: error.message || "Failed to update user" });
+     return;
   }
 };
 
