@@ -11,6 +11,8 @@ import {
   TSelectUser,
 } from "../../drizzle/schema";
 
+import bcrypt from "bcrypt"
+
 // Utility: Exclude password from returned user objects
 function excludePassword<T extends { password?: string }>(user: T): Omit<T, "password"> {
   const { password, ...rest } = user;
@@ -105,14 +107,26 @@ export const createUserService = async (
   return "User created successfully ✅";                                                  
 };
 
-// ✅ Update an existing user by nationalId
 export const updateUserService = async (
   nationalId: number,
   user: Partial<TInsertUser>
 ): Promise<string> => {
-  await db.update(users).set(user).where(eq(users.nationalId, nationalId));
-  return "User updated successfully 🔄";
-};                                                    
+  const dataToUpdate: Partial<TInsertUser> = { ...user };
+
+  // ✅ HASH PASSWORD IF PRESENT
+  if (user.password) {
+    const saltRounds = 10;
+    dataToUpdate.password = await bcrypt.hash(user.password, saltRounds);
+  }
+
+  await db
+    .update(users)
+    .set(dataToUpdate)
+    .where(eq(users.nationalId, nationalId));
+
+  return "User updated successfully";
+};
+                                                
 
 // ✅ Delete user by nationalId
 export const deleteUserService = async (
