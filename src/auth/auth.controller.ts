@@ -14,11 +14,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sendNotificationEmail } from "../middleware/googleMailer";
 
-
 // Generate 6-digit code
 const generateConfirmationCode = () => Math.floor(100000 + Math.random() * 900000);
 
-// Register
+// ===================== REGISTER =====================
 export const registerUser: RequestHandler = async (req, res) => {
   try {
     const parseResult = registerUserValidator.safeParse(req.body);
@@ -28,19 +27,20 @@ export const registerUser: RequestHandler = async (req, res) => {
     }
 
     const user = parseResult.data;
+
     const existingUser = await getUserByEmailService(user.email);
     if (existingUser) {
       res.status(400).json({ error: "User with this email already exists" });
       return;
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hashedPassword = bcrypt.hashSync(user.password, salt);
+    const hashedPassword = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
+    const confirmationCode = generateConfirmationCode().toString();
 
     const newUserPayload = {
       ...user,
       password: hashedPassword,
-      confirmationCode: generateConfirmationCode().toString(),
+      confirmationCode,
       nationalId: Math.floor(100000000 + Math.random() * 900000000),
       emailVerified: false,
       profileImageUrl: null,
@@ -59,7 +59,7 @@ export const registerUser: RequestHandler = async (req, res) => {
         <p>Thank you for registering with our <strong>TicketStream Events And Ticketing System</strong>.</p>
         <p>Your verification code is:</p>
         <div style="background-color: #eef3fc; padding: 10px; border-radius: 6px; text-align: center; font-size: 20px; font-weight: bold; color: #093FB4;">
-        ${newUserPayload.confirmationCode}
+        ${confirmationCode}
         </div>
         <p>Please enter this code to verify your email and activate your account.</p>
         <p style="color: #777;">If you did not create this account, please ignore this email.</p>
@@ -69,7 +69,13 @@ export const registerUser: RequestHandler = async (req, res) => {
 
     const emailSent = await sendNotificationEmail(user.email, subject, user.firstName, html);
 
-    if (!emailSent) {
+    if (emailSent) {
+      console.log(`[EMAIL SUCCESS] Verification email sent to ${user.email}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[DEV] Confirmation code for ${user.email}: ${confirmationCode}`);
+      }
+    } else {
+      console.error(`[EMAIL FAILURE] Failed to send verification email to ${user.email}`);
       res.status(500).json({ error: "User created but failed to send notification email" });
       return;
     }
@@ -79,11 +85,12 @@ export const registerUser: RequestHandler = async (req, res) => {
       user: newUser,
     });
   } catch (error: any) {
+    console.error("[REGISTER ERROR]", error);
     res.status(500).json({ error: error.message || "Failed to register user" });
   }
 };
 
-// Login
+// ===================== LOGIN =====================
 export const loginUser: RequestHandler = async (req, res) => {
   try {
     const parseResult = userLogInValidator.safeParse(req.body);
@@ -94,6 +101,7 @@ export const loginUser: RequestHandler = async (req, res) => {
 
     const user = parseResult.data;
     const userExists = await getUserByEmailService(user.email);
+
     if (!userExists) {
       res.status(404).json({ error: "User does not exist" });
       return;
@@ -129,11 +137,12 @@ export const loginUser: RequestHandler = async (req, res) => {
       message: "Login successful 😎",
     });
   } catch (error: any) {
+    console.error("[LOGIN ERROR]", error);
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
 };
 
-// Forgot Password
+// ===================== PASSWORD RESET =====================
 export const passwordReset: RequestHandler = async (req, res) => {
   try {
     const { email } = req.body;
@@ -157,19 +166,24 @@ export const passwordReset: RequestHandler = async (req, res) => {
     const resetLink = `${process.env.FRONTEND_URL}reset-password/${resetToken}`;
     const html = `Click the link to reset your password: <a href="${resetLink}">Reset Password</a>`;
 
-    const results = await sendNotificationEmail(email, "Password Reset", user.firstName, html);
-    if (!results) {
+    const emailSent = await sendNotificationEmail(email, "Password Reset", user.firstName, html);
+
+    if (emailSent) {
+      console.log(`[EMAIL SUCCESS] Password reset email sent to ${email}`);
+    } else {
+      console.error(`[EMAIL FAILURE] Password reset email failed for ${email}`);
       res.status(500).json({ error: "Failed to send reset email" });
       return;
     }
 
     res.status(200).json({ message: "Password reset email sent successfully" });
   } catch (error: any) {
+    console.error("[PASSWORD RESET ERROR]", error);
     res.status(500).json({ error: error.message || "Failed to reset password" });
   }
 };
 
-// Update Password
+// ===================== UPDATE PASSWORD =====================
 export const updatePassword: RequestHandler = async (req, res) => {
   try {
     const { token } = req.params;
@@ -192,11 +206,12 @@ export const updatePassword: RequestHandler = async (req, res) => {
 
     res.status(200).json({ message: "Password has been reset successfully" });
   } catch (error: any) {
+    console.error("[UPDATE PASSWORD ERROR]", error);
     res.status(500).json({ error: error.message || "Invalid or expired token" });
   }
 };
 
-// Email Verification
+// ===================== EMAIL VERIFICATION =====================
 export const emailVerfication: RequestHandler = async (req, res) => {
   try {
     const { email, confirmationCode } = req.body;
@@ -212,11 +227,7 @@ export const emailVerfication: RequestHandler = async (req, res) => {
       return;
     }
 
-    const updatedUser = await updateVerificationStatusService(
-      user.email!,
-      true,
-      null
-    );
+    const updatedUser = await updateVerificationStatusService(user.email!, true, null);
 
     if (!updatedUser) {
       res.status(500).json({ error: "Failed to update verification status" });
@@ -225,6 +236,7 @@ export const emailVerfication: RequestHandler = async (req, res) => {
 
     res.status(200).json({ message: "Email verified successfully" });
   } catch (error: any) {
+    console.error("[EMAIL VERIFICATION ERROR]", error);
     res.status(500).json({ error: error.message || "Email verification failed" });
   }
 };
