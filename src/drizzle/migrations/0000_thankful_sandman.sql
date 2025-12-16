@@ -85,6 +85,7 @@ CREATE TABLE "ticketTypes" (
 	"name" varchar(100) NOT NULL,
 	"price" numeric(10, 2) NOT NULL,
 	"quantity" integer NOT NULL,
+	"sold" integer,
 	"createdAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

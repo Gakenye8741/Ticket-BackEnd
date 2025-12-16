@@ -98,11 +98,11 @@ export const searchUsersWithDetailsService = async (
 };
 
 // ✅ Create a new user
-export const createUserService = async (
+export const createUserService = async (                              
   user: TInsertUser
 ): Promise<string> => {
   await db.insert(users).values(user).returning();
-  return "User created successfully ✅";
+  return "User created successfully ✅";                                                  
 };
 
 // ✅ Update an existing user by nationalId
@@ -112,7 +112,7 @@ export const updateUserService = async (
 ): Promise<string> => {
   await db.update(users).set(user).where(eq(users.nationalId, nationalId));
   return "User updated successfully 🔄";
-};
+};                                                    
 
 // ✅ Delete user by nationalId
 export const deleteUserService = async (

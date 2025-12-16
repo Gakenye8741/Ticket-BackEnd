@@ -90,6 +90,7 @@ export const ticketTypes = pgTable("ticketTypes", {
   name: varchar("name", { length: 100 }).notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   quantity: integer("quantity").notNull(),
+  sold: integer('sold'),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

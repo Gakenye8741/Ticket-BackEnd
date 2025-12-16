@@ -1,5 +1,5 @@
 {
-  "id": "ae7f4f85-a0e9-4165-aa87-5479d773e292",
+  "id": "b1282d6f-3057-4f94-94ce-61ee88dc6a2b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -618,6 +618,12 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true
+        },
+        "sold": {
+          "name": "sold",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         },
         "createdAt": {
           "name": "createdAt",

@@ -1,5 +1,5 @@
 ###
-GET http://localhost:5000/api/events
+GET http://localhost:5000/api/users
 
 ###
 POST http://localhost:5000/api/auth/password-reset
@@ -45,7 +45,7 @@ Content-Type: application/json
 
 {
    "email": "codewithgakenye@gmail.com",
-    "password":"Gakenye123#"
+    "password":"12345678"
 }
 ###
 POST http://localhost:5000/api/bookings
@@ -211,7 +211,8 @@ Content-Type: application/json
   "email": "codewithgakenye@gmail.com",
   "password": "password3" ,
   "contactPhone": "0112310754",
-  "address": "BOX 1000 Nyeri"
+  "address": "BOX 1000 Nyeri",
+  "role":"admin"
 }
 
 ###
