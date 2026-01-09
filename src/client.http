@@ -16,14 +16,13 @@ Content-Type: application/json
 
  {
     "nationalId": 41436943,
-    "firstName": "Gakenye",
-    "lastName": "Ndiritu",
-    "email": "codingguru8741@gmail.com",
-    "password":"Gakenye123#",
-    "contactPhone": "+25412345678",
+    "firstName": "anma",
+    "lastName": "aaaa",
+    "email": "anthonymaina1011@gmail.com",
+    "password":"123456",
+    "contactPhone": "+25412345679",
     "address": "50 Nyeri",
     "role":"admin"
-
   }
 
 ###

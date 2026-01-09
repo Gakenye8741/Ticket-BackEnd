@@ -31,6 +31,7 @@ app.post(
 app.use(cors({
   origin: [
     "http://localhost:5173",
+    "http://localhost:4173",
     "https://ticketstream-events.netlify.app" // ✅ Added protocol for production origin
   ],
   credentials: true,
