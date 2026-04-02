@@ -14,6 +14,8 @@ import mediaRouter from './services/media/media.route';
 import responseRoute from './services/AdminResponses/response.route';
 import { webhookHandler } from './services/payments/payment.webhook';
 import sendTicketEmailRoute from './middleware/emailTicket'
+import MpesaRoute from './services/payments/Mpesa/Mpesa.route';
+import router from './services/payments/Mpesa/Mpesa.route';
 
 dotenv.config();
 
@@ -57,6 +59,7 @@ app.use('/api', ticketRouter);
 app.use('/api', mediaRouter);
 app.use('/api', responseRoute);
 app.use('/api', sendTicketEmailRoute);
+app.use('/api', router)
 
 // ✅ Start server
 app.listen(PORT, () => {

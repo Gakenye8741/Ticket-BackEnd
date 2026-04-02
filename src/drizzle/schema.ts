@@ -9,7 +9,8 @@ import {
   date,
   time,
   pgEnum,
-  boolean
+  boolean,
+  jsonb
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -19,7 +20,7 @@ import { relations } from "drizzle-orm";
 
 export const roleEnum = pgEnum("role", ["user", "admin"]);
 export const bookingStatusEnum = pgEnum("bookingStatus", ["Pending", "Confirmed", "Cancelled"]);
-export const paymentStatusEnum = pgEnum("paymentStatus", ["Pending", "Completed", "Failed"]);
+export const paymentStatusEnum = pgEnum("paymentStatus", ["Pending", "Completed", "Failed","Paid"]);
 export const ticketStatusEnum = pgEnum("status", ["Open", "In Progress", "Resolved", "Closed"]);
 export const venueStatusEnum = pgEnum("venueStatus", ["available", "booked"]);
 export const eventStatusEnum = pgEnum("eventStatus", ["in_progress", "ended", "cancelled", "upcoming"]);
@@ -94,6 +95,14 @@ export const ticketTypes = pgTable("ticketTypes", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+
+export const mpesaLogs = pgTable("mpesa_logs", {
+  id: serial("id").primaryKey(),
+  checkoutRequestId: text("checkout_request_id"),
+  rawResponse: jsonb("raw_response"), // Stores the entire M-Pesa JSON body
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // =======================
 // BOOKINGS
 // =======================
@@ -107,6 +116,7 @@ export const bookings = pgTable("bookings", {
   quantity: integer("quantity").notNull(),
   totalAmount: decimal("totalAmount", { precision: 10, scale: 2 }).notNull(),
   bookingStatus: bookingStatusEnum("bookingStatus").default("Pending").notNull(),
+  checkoutRequestId: text("checkout_request_id").unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
@@ -115,17 +125,22 @@ export const bookings = pgTable("bookings", {
 // PAYMENTS
 // =======================
 
+// drizzle/schema.ts
+
 export const payments = pgTable("payments", {
   paymentId: serial("paymentId").primaryKey(),
-  bookingId: integer("bookingId").references(() => bookings.bookingId, { onDelete: "cascade" }),
+  bookingId: integer("bookingId")
+    .references(() => bookings.bookingId, { onDelete: "cascade" }),
   nationalId: integer("nationalId")
     .notNull()
     .references(() => users.nationalId, { onDelete: "cascade" }),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   paymentStatus: paymentStatusEnum("paymentStatus").default("Pending").notNull(),
   paymentDate: timestamp("paymentDate").defaultNow().notNull(),
-  paymentMethod: varchar("paymentMethod", { length: 50 }),
-  transactionId: varchar("transactionId", { length: 255 }),
+  // Increased length for flexibility between Stripe (pi_...) and M-Pesa (RDK...)
+  paymentMethod: varchar("paymentMethod", { length: 100 }), 
+  // Added unique constraint to prevent duplicate processing of the same receipt
+  transactionId: varchar("transactionId", { length: 255 }).unique(), 
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });

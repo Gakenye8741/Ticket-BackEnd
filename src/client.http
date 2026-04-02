@@ -43,8 +43,8 @@ POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-   "email": "codewithgakenye@gmail.com",
-    "password":"12345678"
+   "email": "anthonymaina1011@gmail.com",
+    "password":"123456"
 }
 ###
 POST http://localhost:5000/api/bookings
@@ -225,12 +225,6 @@ Content-Type: application/json
 }
 
 # Create a new user
-
-
-
-
-
-
 
 
 
