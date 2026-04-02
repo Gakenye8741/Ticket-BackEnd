@@ -26,7 +26,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
 // Get user by nationalId
 export const getUserByNationalId = async (req: Request, res: Response) => {
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
   if (isNaN(nationalId)) {
     res.status(400).json({ error: "Invalid national ID" });
     return;
@@ -67,7 +67,7 @@ export const getUserByLastName = async (req: Request, res: Response) => {
 
 // Get full user profile with all related data using nationalId
 export const getUserDetails = async (req: Request, res: Response) => {
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
   if (isNaN(nationalId)) {
     res.status(400).json({ error: "Invalid national ID" });
      return;
@@ -124,17 +124,14 @@ export const createUser = async (req: Request, res: Response) => {
 
 /// Update user by nationalId (partial update allowed)
 export const updateUser = async (req: Request, res: Response) => {
-  console.log(req.body);
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
   if (isNaN(nationalId)) {
    res.status(400).json({ error: "Invalid national ID" });
     return 
   }
 
-  // Extract possible fields from the request body
   const { firstName, lastName, email, password, profileImageUrl, role } = req.body;
 
-  // Build the update object dynamically
   const updates: any = {};
   if (firstName !== undefined) updates.firstName = firstName;
   if (lastName !== undefined) updates.lastName = lastName;
@@ -147,7 +144,7 @@ export const updateUser = async (req: Request, res: Response) => {
     res.status(400).json({ error: "No valid fields provided for update" });
      return;
   }
-  console.log(profileImageUrl);
+
   try {
     const result = await updateUserService(nationalId, updates);
      res.status(200).json({ message: result, updatedFields: updates });
@@ -158,9 +155,9 @@ export const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-// Update user by nationalId
+// Update user by nationalId (Admin)
 export const updateAdminUser = async (req: Request, res: Response) => {
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
   if (isNaN(nationalId)) {
     res.status(400).json({ error: "Invalid national ID" });
     return;
@@ -182,7 +179,7 @@ export const updateAdminUser = async (req: Request, res: Response) => {
 
 // Delete user by nationalId
 export const deleteUser = async (req: Request, res: Response) => {
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
   if (isNaN(nationalId)) {
     res.status(400).json({ error: "Invalid national ID" });
     return;

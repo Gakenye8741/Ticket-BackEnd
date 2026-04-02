@@ -22,7 +22,7 @@ export const getAllSupTickets: RequestHandler = async (req, res) => {
 // ✅ Get a ticket by ID
 export const getTicketById: RequestHandler = async (req, res) => {
   try {
-    const ticketId = parseInt(req.params.id);
+    const ticketId = parseInt(req.params.id as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;
@@ -43,7 +43,7 @@ export const getTicketById: RequestHandler = async (req, res) => {
 // ✅ Get ticket with user details
 export const getTicketbyIdDetails: RequestHandler = async (req, res) => {
   try {
-    const ticketId = parseInt(req.params.id);
+    const ticketId = parseInt(req.params.id as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;
@@ -74,7 +74,7 @@ export const createTicket: RequestHandler = async (req, res) => {
 // ✅ Update a ticket
 export const updateTicket: RequestHandler = async (req, res) => {
   try {
-    const ticketId = parseInt(req.params.id);
+    const ticketId = parseInt(req.params.id as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;
@@ -90,7 +90,7 @@ export const updateTicket: RequestHandler = async (req, res) => {
 // ✅ Delete a ticket
 export const deleteTicket: RequestHandler = async (req, res) => {
   try {
-    const ticketId = parseInt(req.params.id);
+    const ticketId = parseInt(req.params.id as string);
     if (isNaN(ticketId)) {
       res.status(400).json({ error: "Invalid ticket ID" });
       return;
@@ -106,7 +106,7 @@ export const deleteTicket: RequestHandler = async (req, res) => {
 // ✅ Get all tickets by user's national ID
 export const getTicketsByNationalId: RequestHandler = async (req, res) => {
   try {
-    const nationalId = parseInt(req.params.nationalId);
+    const nationalId = parseInt(req.params.nationalId as string);
     if (isNaN(nationalId)) {
       res.status(400).json({ error: "Invalid national ID" });
       return;

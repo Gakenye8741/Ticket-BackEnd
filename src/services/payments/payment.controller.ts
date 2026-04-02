@@ -12,7 +12,7 @@ import {
 } from "./payment.service";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-06-30.basil",
+  apiVersion: "2025-08-27.basil",
 });
 
 // 📥 Get all payments
@@ -31,7 +31,7 @@ export const getAllPayments: RequestHandler = async (req, res): Promise<void> =>
 
 // 📥 Get payment by ID
 export const getPaymentById: RequestHandler = async (req, res): Promise<void> => {
-  const paymentId = parseInt(req.params.id);
+  const paymentId = parseInt(req.params.id as string);
   if (isNaN(paymentId)) {
     res.status(400).json({ error: "🚫 Invalid payment ID" });
     return;
@@ -50,7 +50,7 @@ export const getPaymentById: RequestHandler = async (req, res): Promise<void> =>
 
 // 📥 Get payments by Booking ID
 export const getPaymentsByBookingId: RequestHandler = async (req, res): Promise<void> => {
-  const bookingId = parseInt(req.params.bookingId);
+  const bookingId = parseInt(req.params.bookingId as string);
   if (isNaN(bookingId)) {
     res.status(400).json({ error: "🚫 Invalid booking ID" });
     return;
@@ -69,7 +69,7 @@ export const getPaymentsByBookingId: RequestHandler = async (req, res): Promise<
 
 // 📥 Get payments by National ID
 export const getPaymentsByNationalId: RequestHandler = async (req, res): Promise<void> => {
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
   if (isNaN(nationalId)) {
     res.status(400).json({ error: "🚫 Invalid national ID" });
     return;
@@ -152,7 +152,7 @@ export const createPayment: RequestHandler = async (req, res): Promise<void> => 
 
 // 🔄 Update payment
 export const updatePayment: RequestHandler = async (req, res): Promise<void> => {
-  const paymentId = parseInt(req.params.id);
+  const paymentId = parseInt(req.params.id as string);
   if (isNaN(paymentId)) {
     res.status(400).json({ error: "🚫 Invalid payment ID" });
     return;
@@ -194,7 +194,7 @@ export const updatePayment: RequestHandler = async (req, res): Promise<void> => 
 
 // 🗑️ Delete payment
 export const deletePayment: RequestHandler = async (req, res): Promise<void> => {
-  const paymentId = parseInt(req.params.id);
+  const paymentId = parseInt(req.params.id as string);
   if (isNaN(paymentId)) {
     res.status(400).json({ error: "🚫 Invalid payment ID" });
     return;

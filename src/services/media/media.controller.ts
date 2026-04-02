@@ -20,7 +20,7 @@ export const getAllMediaController: RequestHandler = async (req, res): Promise<v
 
 // 📥 Get media by event ID
 export const getMediaByEventIdController: RequestHandler = async (req, res): Promise<void> => {
-  const eventId = parseInt(req.params.eventId);
+  const eventId = parseInt(req.params.eventId as string);
   if (isNaN(eventId)) {
     res.status(400).json({ message: "Invalid event ID" });
     return;
@@ -36,7 +36,7 @@ export const getMediaByEventIdController: RequestHandler = async (req, res): Pro
 
 // 📥 Get media by type
 export const getMediaByTypeController: RequestHandler = async (req, res): Promise<void> => {
-  const type = req.params.type;
+  const type = req.params.type as string;
   if (!["image", "video"].includes(type)) {
     res.status(400).json({ message: "Type must be 'image' or 'video'" });
     return;
@@ -69,7 +69,7 @@ export const createMediaController: RequestHandler = async (req, res): Promise<v
 
 // 🔄 Update media
 export const updateMediaController: RequestHandler = async (req, res): Promise<void> => {
-  const mediaId = parseInt(req.params.mediaId);
+  const mediaId = parseInt(req.params.mediaId as string);
   if (isNaN(mediaId)) {
     res.status(400).json({ message: "Invalid media ID" });
     return;
@@ -85,7 +85,7 @@ export const updateMediaController: RequestHandler = async (req, res): Promise<v
 
 // 🗑️ Delete media
 export const deleteMediaController: RequestHandler = async (req, res): Promise<void> => {
-  const mediaId = parseInt(req.params.mediaId);
+  const mediaId = parseInt(req.params.mediaId as string);
   if (isNaN(mediaId)) {
     res.status(400).json({ message: "Invalid media ID" });
     return;

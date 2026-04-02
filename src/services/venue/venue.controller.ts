@@ -1,5 +1,4 @@
-
-import { Response,Request, response } from "express";
+import { Response, Request } from "express";
 import { CreateVenueServices, deleteVenueByIdServices, getAllDetailsForVenue, getAllVenueServices, getVenueByIdServices, searchVenuesByName, updateVenueServices } from "./venue.service";
 
 // Get all Venues
@@ -19,7 +18,7 @@ export const GetAllVenues = async(req: Request, res: Response) =>{
 
 // Get Venue By Name
 export const getVenueByName = async (req: Request, res: Response)=>{
-   const VenueName =  req.params.name;   
+   const VenueName =  req.params.name as string;   
    try {
     const venueBYName = await getVenueByIdServices(VenueName);
     if(!venueBYName){
@@ -88,7 +87,7 @@ export const CreateVenue = async(req: Request, res: Response) =>{
 
 // Deleting A venue
 export const DeleteVenue = async(req: Request, res: Response) =>{
-    const venueId = parseInt(req.params.id);
+    const venueId = parseInt(req.params.id as string);
     if(isNaN(venueId)){
         res.status(400).json({ error: "🚫 Invalid Venue ID" });
         return;
@@ -101,9 +100,10 @@ export const DeleteVenue = async(req: Request, res: Response) =>{
     res.status(500).json({ error: "🚫 " + (error.message || "Failed to delete Venue") });
   }
 }
+
 // Updating Venue
 export const updateVenue = async (req: Request, res: Response) => {
-  const venueId = parseInt(req.params.id);
+  const venueId = parseInt(req.params.id as string);
   if (isNaN(venueId)) {
     res.status(400).json({ error: "🚫 Invalid venue ID" });
     return;
