@@ -24,7 +24,8 @@ export const getAllTicketTypes: RequestHandler = async (req, res): Promise<void>
 
 // 📥 Get ticket type by ID
 export const getTicketTypeById: RequestHandler = async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  // Cast to string to satisfy TS2345
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ticket type ID" });
     return;
@@ -44,7 +45,8 @@ export const getTicketTypeById: RequestHandler = async (req, res): Promise<void>
 
 // 📥 Get ticket types by event ID
 export const getTicketTypesByEventId: RequestHandler = async (req, res): Promise<void> => {
-  const eventId = parseInt(req.params.eventId);
+  // Cast to string to satisfy TS2345
+  const eventId = parseInt(req.params.eventId as string);
   if (isNaN(eventId)) {
     res.status(400).json({ error: "Invalid event ID" });
     return;
@@ -81,7 +83,8 @@ export const createTicketType: RequestHandler = async (req, res): Promise<void> 
 
 // 🔄 Update ticket type
 export const updateTicketType: RequestHandler = async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  // Cast to string to satisfy TS2345
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ticket type ID" });
     return;
@@ -103,7 +106,8 @@ export const updateTicketType: RequestHandler = async (req, res): Promise<void> 
 
 // 🗑️ Delete ticket type
 export const deleteTicketType: RequestHandler = async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id);
+  // Cast to string to satisfy TS2345
+  const id = parseInt(req.params.id as string);
   if (isNaN(id)) {
     res.status(400).json({ error: "Invalid ticket type ID" });
     return;
