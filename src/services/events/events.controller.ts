@@ -26,7 +26,7 @@ export const getAllEvents = async (req: Request, res: Response) => {
 
 // Get event by ID
 export const getEventById = async (req: Request, res: Response) => {
-  const eventId = parseInt(req.params.id);
+  const eventId = parseInt(req.params.id as string);
   if (isNaN(eventId)) {
     res.status(400).json({ error: "🚫 Invalid event ID" });
     return;
@@ -140,7 +140,7 @@ export const createEvent = async (req: Request, res: Response) => {
 
 // Update event
 export const updateEvent = async (req: Request, res: Response) => {
-  const eventId = parseInt(req.params.id);
+  const eventId = parseInt(req.params.id as string);
   if (isNaN(eventId)) {
     res.status(400).json({ error: "🚫 Invalid event ID" });
     return;
@@ -194,7 +194,7 @@ export const updateEvent = async (req: Request, res: Response) => {
 
 // Delete event
 export const deleteEvent = async (req: Request, res: Response) => {
-  const eventId = parseInt(req.params.id);
+  const eventId = parseInt(req.params.id as string);
   if (isNaN(eventId)) {
     res.status(400).json({ error: "🚫 Invalid event ID" });
     return;
@@ -210,7 +210,7 @@ export const deleteEvent = async (req: Request, res: Response) => {
 
 // Get events by user's national ID
 export const getEventsByUserId = async (req: Request, res: Response) => {
-  const nationalId = parseInt(req.params.nationalId);
+  const nationalId = parseInt(req.params.nationalId as string);
 
   if (isNaN(nationalId)) {
     res.status(400).json({ error: "🚫 Invalid national ID" });

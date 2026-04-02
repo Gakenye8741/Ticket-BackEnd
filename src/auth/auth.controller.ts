@@ -186,7 +186,7 @@ export const passwordReset: RequestHandler = async (req, res) => {
 // ===================== UPDATE PASSWORD =====================
 export const updatePassword: RequestHandler = async (req, res) => {
   try {
-    const { token } = req.params;
+    const token = req.params.token as string;
     const { password } = req.body;
 
     if (!token || !password) {
@@ -194,7 +194,14 @@ export const updatePassword: RequestHandler = async (req, res) => {
       return;
     }
 
-    const payload: any = jwt.verify(token, process.env.JWT_SECRET!);
+    // Fixed: Cast the payload as a JwtPayload to allow accessing .nationalId
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
+    
+    if (!payload.nationalId) {
+      res.status(400).json({ error: "Invalid token payload" });
+      return;
+    }
+
     const user = await getUserById(payload.nationalId);
     if (!user) {
       res.status(404).json({ error: "User not found" });
