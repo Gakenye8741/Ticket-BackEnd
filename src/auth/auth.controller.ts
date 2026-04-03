@@ -123,7 +123,7 @@ export const loginUser: RequestHandler = async (req, res) => {
       userEmail: userExists.email,
       role: userExists.role,
       firstName: userExists.firstName,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 60)  ,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET!);
