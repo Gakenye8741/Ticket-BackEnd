@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import db from "../../drizzle/db";
 import {
   payments,
@@ -7,6 +7,30 @@ import {
   TSelectPayment,
   paymentStatusEnum
 } from "../../drizzle/schema";
+
+// ✅ Get payments by Event ID
+// This fetches payments by looking through the associated booking's eventId
+export const getPaymentsByEventIdService = async (
+  eventId: number
+): Promise<TSelectPayment[]> => {
+  return await db.query.payments.findMany({
+    where: (payments, { exists }) => 
+      exists(
+        db.select()
+          .from(bookings)
+          .where(
+            and(
+              eq(bookings.bookingId, payments.bookingId),
+              eq(bookings.eventId, eventId)
+            )
+          )
+      ),
+    orderBy: [desc(payments.paymentDate)],
+    with: {
+      booking: true, // Includes booking details so you can see which event it belongs to
+    },
+  });
+};
 
 // Get all payments
 export const getAllPaymentsService = async (): Promise<TSelectPayment[]> => {
@@ -43,7 +67,7 @@ export const getPaymentsByBookingIdService = async (
   });
 };
 
-// ✅ Get payments by National ID
+// Get payments by National ID
 export const getPaymentsByNationalIdService = async (
   nationalId: number
 ): Promise<TSelectPayment[]> => {

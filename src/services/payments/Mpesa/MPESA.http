@@ -1,7 +1,7 @@
 ### Variables
 @baseUrl = http://localhost:5000/api
 @phoneNumber = 254112310754
-@bookingId = 66
+@bookingId = 68
 @amount = 1
 
 ### 1. Initiate STK Push

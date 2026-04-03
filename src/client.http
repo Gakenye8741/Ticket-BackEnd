@@ -92,7 +92,7 @@ GET http://localhost:5000/api/details/users-search?q=smith
 ###
 GET http://localhost:5000/api/bookings/user/national-id/11223344
 ###
-GET http://localhost:5000/api/payments
+GET http://localhost:5000/api/payments/booking/70
 ###
 GET http://localhost:5000/api/bookings
 
@@ -180,7 +180,7 @@ Content-Type: application/json
 GET http://localhost:5000/api/bookings
 
 ###
-GET  http://localhost:5000/api/payments
+GET  http://localhost:5000/api/payments/event/25
 
 
 

@@ -4,7 +4,8 @@ import {
   getPaymentById,
   getPaymentsByBookingId,
   getPaymentsByStatus,
-  getPaymentsByNationalId, // ✅ Added this
+  getPaymentsByNationalId,
+  getPaymentsByEvent, // ✅ Added this
   createPayment,
   updatePayment,
   deletePayment,
@@ -19,6 +20,9 @@ paymentRouter.get("/payments-status-search", getPaymentsByStatus);
 
 // ✅ Get payments by national ID
 paymentRouter.get("/payments/national-id/:nationalId", getPaymentsByNationalId);
+
+// ✅ Get payments by event ID
+paymentRouter.get("/payments/event/:eventId", getPaymentsByEvent);
 
 // Get all payments
 paymentRouter.get("/payments", getAllPayments);
@@ -41,4 +45,4 @@ paymentRouter.delete("/payments/:id", deletePayment);
 // Stripe Checkout Session
 paymentRouter.post("/payments/create-session", createCheckoutSession);
 
-paymentRouter.post('/payment/webhook' ,webhookHandler)
+paymentRouter.post('/payment/webhook', webhookHandler);

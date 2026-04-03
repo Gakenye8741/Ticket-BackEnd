@@ -6,6 +6,7 @@ import {
   getPaymentsByBookingIdService,
   getPaymentsByStatusService,
   getPaymentsByNationalIdService,
+  getPaymentsByEventIdService, // New service import
   createPaymentService,
   updatePaymentService,
   deletePaymentService,
@@ -83,6 +84,25 @@ export const getPaymentsByNationalId: RequestHandler = async (req, res): Promise
     }
   } catch (error: any) {
     res.status(500).json({ error: "🚫 " + (error.message || `Failed to retrieve payments for national ID ${nationalId}`) });
+  }
+};
+
+// 📥 Get payments by Event ID
+export const getPaymentsByEvent: RequestHandler = async (req, res): Promise<void> => {
+  const eventId = parseInt(req.params.eventId as string);
+  if (isNaN(eventId)) {
+    res.status(400).json({ error: "🚫 Invalid event ID" });
+    return;
+  }
+  try {
+    const payments = await getPaymentsByEventIdService(eventId);
+    if (!payments || payments.length === 0) {
+      res.status(404).json({ message: `🔍 No payments found for event ID ${eventId}` });
+    } else {
+      res.status(200).json(payments);
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: "🚫 " + (error.message || `Failed to retrieve payments for event ID ${eventId}`) });
   }
 };
 
