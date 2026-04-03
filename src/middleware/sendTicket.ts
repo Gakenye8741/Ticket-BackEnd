@@ -39,8 +39,8 @@ Booking Date: ${new Date(ticket.bookingDate).toLocaleString()}
   <p><strong>National ID:</strong> ${ticket.nationalId}</p>
   <p><strong>Ticket Type:</strong> ${ticket.ticketType}</p>
   <p><strong>Quantity:</strong> ${ticket.quantity}</p>
-  <p><strong>Price per ticket:</strong> $${ticket.price.toFixed(2)}</p>
-  <p><strong>Total:</strong> $${ticket.total.toFixed(2)}</p>
+  <p><strong>Price per ticket:</strong> KSH${ticket.price.toFixed(2)}</p>
+  <p><strong>Total:</strong> KSH${ticket.total.toFixed(2)}</p>
   <p><strong>Payment Status:</strong> ${ticket.paymentStatus}</p>
   <p><strong>Booking Date:</strong> ${new Date(ticket.bookingDate).toLocaleString()}</p>
   <hr />
