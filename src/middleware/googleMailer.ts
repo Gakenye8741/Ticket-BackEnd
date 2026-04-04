@@ -13,10 +13,20 @@ export const sendNotificationEmail = async (
   try {
     const transporter = nodemailer.createTransport({
       service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // Recommended for port 587 on cloud hosting
       auth: {
         user: process.env.EMAIL_SENDER,
         pass: process.env.EMAIL_PASSWORD,
       },
+      // Adding these to prevent the "Connection Timeout" on Render
+      connectionTimeout: 30000, // 30 seconds
+      greetingTimeout: 30000,   // 30 seconds
+      socketTimeout: 45000,     // 45 seconds
+      tls: {
+        rejectUnauthorized: false // Helps bypass Render's network restrictions
+      }
     });
 
     const mailOptions = {
