@@ -20,7 +20,6 @@ export const sendNotificationEmail = async (
     });
 
     const mailOptions = {
-      /* Branded as Madollar Tickets */
       from: `"Madollar Tickets" <${process.env.EMAIL_SENDER}>`,
       to: email,
       subject,
