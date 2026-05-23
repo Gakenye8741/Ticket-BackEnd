@@ -1,0 +1,75 @@
+### =========================================================================
+### Environment Configuration Variables
+### =========================================================================
+@baseUrl = http://localhost:5000/api
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjozMDQxMTQ3MTYsInVzZXJFbWFpbCI6ImFudGhvbnltYWluYTEwMTFAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiZmlyc3ROYW1lIjoibWFkb2xsYXIiLCJleHAiOjE3ODQ3MDczMzcsImlhdCI6MTc3OTUyMzMzN30.8lBx0MW4c_C3IZoito1AcgYtRf4gMOrG01C07JexOOw
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MDU1NDg2OTYsInVzZXJFbWFpbCI6ImNvZGV3aXRoZ2FrZW55ZUBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImZpcnN0TmFtZSI6Ikdha2VueWUgIiwiZXhwIjoxNzg0NzA3Mzg0LCJpYXQiOjE3Nzk1MjMzODR9.TzKCqVOCiRlyVAuFeBnic_NUtR2AC8zEYT8dmTtWXec
+### Replace these mock values with real data references from your Postgres tables
+@sampleNationalId = 405548696
+@sampleEventId = 31
+@sampleBookingId = 105
+@sampleGeneratedToken = fa4755de-9614-4720-b2e5-e0b700874b03
+
+
+### =========================================================================
+### 🛠️ 1. Direct Manual Ticket Issuance (Admin Only)
+### =========================================================================
+# @name issueTicket
+POST {{baseUrl}}/tickets/issue
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "bookingId": {{sampleBookingId}},
+  "eventId": {{sampleEventId}},
+  "nationalId": {{sampleNationalId}},
+  "quantity": 2
+}
+
+
+### =========================================================================
+### 📱 2. In-App Mobile Wallet Sync (Any Authenticated User)
+### =========================================================================
+# @name getMobileWallet
+GET {{baseUrl}}/tickets/my-passes/{{sampleNationalId}}
+Authorization: Bearer {{userToken}}
+
+
+### =========================================================================
+### 🎟️ 3. Gate Validation Scanner - Clean Initial Entry (Admin Only)
+### =========================================================================
+# @name initialVerifyGatePass
+POST {{baseUrl}}/tickets/verify
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "ticketToken": "{{sampleGeneratedToken}}"
+}
+
+
+### =========================================================================
+### ⚠️ 4. Gate Validation Scanner - Double-Entry Guard Test (Admin Only)
+### =========================================================================
+# @name duplicateVerifyGatePass
+# Running this immediately after Step 3 should trip your `ticket.isScanned` double-entry guard rule.
+POST {{baseUrl}}/tickets/verify
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "ticketToken": "{{sampleGeneratedToken}}"
+}
+
+
+### =========================================================================
+### ❌ 5. Malformed Request Validation Test
+### =========================================================================
+# Checks if your Express controller string type validator handles empty payloads gracefully.
+POST {{baseUrl}}/tickets/verify
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "ticketToken": ""
+}

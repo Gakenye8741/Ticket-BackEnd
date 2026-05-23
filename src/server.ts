@@ -16,6 +16,7 @@ import { webhookHandler } from './services/payments/payment.webhook';
 import sendTicketEmailRoute from './middleware/emailTicket'
 import MpesaRoute from './services/payments/Mpesa/Mpesa.route';
 import router from './services/payments/Mpesa/Mpesa.route';
+import qrTicketRoutes from './services/qrcodeTickets/qrcode.route';
 
 dotenv.config();
 
@@ -59,7 +60,8 @@ app.use('/api', ticketRouter);
 app.use('/api', mediaRouter);
 app.use('/api', responseRoute);
 app.use('/api', sendTicketEmailRoute);
-app.use('/api', router)
+app.use('/api', router);
+app.use('/api/tickets', qrTicketRoutes); // 👈 Added '/tickets' wrapper prefix safely
 
 // ✅ Start server
 app.listen(PORT, () => {

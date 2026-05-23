@@ -43,8 +43,8 @@ POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
-   "email": "anthonymaina1011@gmail.com",
-    "password":"123456"
+   "email": "codewithgakenye@gmail.com",
+    "password":"12345678"
 }
 ###
 POST http://localhost:5000/api/bookings
@@ -145,6 +145,9 @@ GET http://localhost:5000/api/details/venues/search?name=g
 
 ###
 DELETE http://localhost:5000/api/venues/4ererw
+
+###
+GET http://localhost:5000/api/events
 
 ###
 POST  http://localhost:5000/api/events
