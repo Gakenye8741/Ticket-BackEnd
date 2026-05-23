@@ -20,7 +20,7 @@ export const sendNotificationEmail = async (
     });
 
     const mailOptions = {
-      from: `"Madollar Tickets" <${process.env.EMAIL_SENDER}>`,
+      from: `"Ticket Stream" <${process.env.EMAIL_SENDER}>`,
       to: email,
       subject,
       text: message,
