@@ -13,6 +13,7 @@ import {
   jsonb
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { uniqueIndex } from "drizzle-orm/pg-core";
 
 // =======================
 // ENUMS
@@ -192,12 +193,38 @@ export const responses = pgTable("responses", {
 });
 
 // =======================
+// TICKETS (INDIVIDUAL QR ENTRIES)
+// =======================
+
+export const tickets = pgTable("tickets", {
+  ticketId: serial("ticketId").primaryKey(),
+  
+  // Directly linking to the owner (Allows users to have many individual tickets)
+  nationalId: integer("nationalId")
+    .references(() => users.nationalId, { onDelete: "cascade" })
+    .notNull(),
+
+  bookingId: integer("bookingId").references(() => bookings.bookingId, { onDelete: "cascade" }).notNull(),
+  eventId: integer("eventId").references(() => events.eventId, { onDelete: "cascade" }).notNull(),
+  ticketToken: varchar("ticketToken", { length: 255 }).notNull().unique(),
+  isScanned: boolean("isScanned").default(false).notNull(),
+  scannedAt: timestamp("scannedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+}, (table) => {
+  return {
+    tokenIdx: uniqueIndex("token_idx").on(table.ticketToken),
+  };
+});
+
+// =======================
 // RELATIONS
 // =======================
 
 export const usersRelations = relations(users, ({ many }) => ({
   bookings: many(bookings),
   supportTickets: many(supportTickets),
+  tickets: many(tickets), // Added: A user can directly access all their individual scannable tickets
 }));
 
 export const venuesRelations = relations(venues, ({ many }) => ({
@@ -213,6 +240,7 @@ export const eventsRelations = relations(events, ({ one, many }) => ({
   bookings: many(bookings),
   ticketTypes: many(ticketTypes),
   media: many(media),
+  tickets: many(tickets), // Added: An event tracks all its individual scannable tickets
 }));
 
 export const ticketTypesRelations = relations(ticketTypes, ({ one }) => ({
@@ -236,6 +264,7 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
     references: [ticketTypes.ticketTypeId],
   }),
   payments: many(payments),
+  tickets: many(tickets), // Added: A single booking can generate multiple individual QR tickets
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
@@ -280,6 +309,24 @@ export const responsesRelations = relations(responses, ({ one }) => ({
 }));
 
 // =======================
+// NEW: TICKETS RELATIONS
+// =======================
+// Update your ticketsRelations at the bottom of your file to look like this:
+export const ticketsRelations = relations(tickets, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [tickets.bookingId],
+    references: [bookings.bookingId],
+  }),
+  event: one(events, {
+    fields: [tickets.eventId],
+    references: [events.eventId],
+  }),
+  user: one(users, { // Added: A single ticket belongs directly to a user
+    fields: [tickets.nationalId],
+    references: [users.nationalId],
+  }),
+}));
+// =======================
 // TYPES
 // =======================
 
@@ -297,6 +344,12 @@ export type TInsertTicketType = typeof ticketTypes.$inferInsert;
 
 export type TSelectBooking = typeof bookings.$inferSelect;
 export type TInsertBooking = typeof bookings.$inferInsert;
+
+// =======================
+// NEW: TICKETS TYPES
+// =======================
+export type TSelectTicket = typeof tickets.$inferSelect;
+export type TInsertTicket = typeof tickets.$inferInsert;
 
 export type TSelectPayment = typeof payments.$inferSelect;
 export type TInsertPayment = typeof payments.$inferInsert;

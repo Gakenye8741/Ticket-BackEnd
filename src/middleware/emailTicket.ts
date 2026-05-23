@@ -4,11 +4,17 @@ import nodemailer from 'nodemailer';
 const router = express.Router();
 
 // --------------------
-// 🧾 Types
+// 🧾 Types (Updated to support QR Arrays)
 // --------------------
 interface TicketType {
   name: string;
   price: string;
+}
+
+interface QrAsset {
+  ticketId: number;
+  ticketToken: string;
+  qrDataUrl: string; // The base64 data string from QRCode.toDataURL
 }
 
 interface Booking {
@@ -20,6 +26,7 @@ interface Booking {
   quantity: number;
   paymentStatus?: string;
   createdAt: string;
+  qrCodes?: QrAsset[]; // Attached from issueTicketsAndQrsService
 }
 
 interface User {
@@ -47,14 +54,13 @@ router.post('/send-ticket-email', async (req, res) => {
     const eventTitle = bookings[0]?.event?.title || 'Your Event';
 
     await transporter.sendMail({
-      /* Branded as Madollar Tickets */
       from: `"Madollar Tickets" <${process.env.EMAIL_SENDER}>`,
       to: user.email,
-      subject: `🎟️ Your Tickets for ${eventTitle}`,
+      subject: `🎟️ Your Scanable Tickets for ${eventTitle}`,
       html: htmlContent,
     });
 
-    res.status(200).json({ message: 'Ticket email sent successfully.' });
+    res.status(200).json({ message: 'Ticket email with QR codes sent successfully.' });
   } catch (error) {
     console.error('Error sending ticket email:', error);
     res.status(500).json({ message: 'Failed to send ticket email.' });
@@ -62,7 +68,7 @@ router.post('/send-ticket-email', async (req, res) => {
 });
 
 // --------------------
-// ✨ Email Template
+// ✨ Email Template (With high-contrast QR injection)
 // --------------------
 function generateTicketEmailHtml(bookings: Booking[], user: User): string {
   const eventTitle = bookings[0]?.event?.title || 'Event';
@@ -74,62 +80,78 @@ function generateTicketEmailHtml(bookings: Booking[], user: User): string {
         <img 
           src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&h=250&q=80" 
           alt="Event Celebration" 
-          style="width: 100%; max-width: 600px; height: auto; border-radius: 12px; shadow: 0 4px 6px rgba(0,0,0,0.1);" 
+          style="width: 100%; max-width: 600px; height: auto; border-radius: 12px;" 
         />
       </div>
 
       <h2 style="color: #1f2937;">Hello ${user.firstName} ${user.lastName},</h2>
 
       <p style="font-size: 16px; color: #374151; margin-bottom: 12px;">
-        Thank you for your booking! 🎉 We're excited to have you join us at:
+        Your payment has been cleared! 🎉 Below are your entry passes for:
       </p>
 
       <h1 style="color: #3b82f6; font-size: 28px; font-weight: bold; margin-bottom: 24px;">
         ${eventTitle}
       </h1>
 
+      <!-- Booking Pass Details Info Box -->
       <div style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 8px; margin-bottom: 24px;">
         ${bookings
           .map(
             (booking) => `
-              <h3 style="color: #2563eb; font-size: 20px; margin-bottom: 12px;">🎟️ Booking #${booking.bookingId}</h3>
-              <p><strong>Ticket Type:</strong> ${booking.ticketType?.name || 'N/A'}</p>
-              <p><strong>Quantity:</strong> ${booking.quantity}</p>
-              <p><strong>Price per Ticket:</strong> KSH ${parseFloat(booking.ticketType?.price || '0').toFixed(2)}</p>
-              <p><strong>Total Paid:</strong> <strong>KSH ${(parseFloat(booking.ticketType?.price || '0') * booking.quantity).toFixed(2)}</strong></p>
-              <p><strong>Payment Status:</strong> ${booking.paymentStatus || 'Unknown'}</p>
+              <h3 style="color: #2563eb; font-size: 20px; margin-bottom: 12px;">🧾 Order Summary: Booking #${booking.bookingId}</h3>
+              <p><strong>Ticket Tier:</strong> ${booking.ticketType?.name || 'Standard'}</p>
+              <p><strong>Total Tickets:</strong> ${booking.quantity}</p>
+              <p><strong>Total Amount Paid:</strong> <strong>KSH ${(parseFloat(booking.ticketType?.price || '0') * booking.quantity).toFixed(2)}</strong></p>
               <p><strong>Booking Date:</strong> ${new Date(booking.createdAt).toLocaleString()}</p>
-              <hr style="margin: 16px 0;" />
+              
+              <div style="margin-top: 20px; text-align: center;">
+                <p style="font-weight: bold; color: #1f2937; margin-bottom: 12px;">👇 PRESENT QR CODE(S) AT THE CHECKPOINT 👇</p>
+                
+                <!-- Inner loop to render individual high-contrast QR graphics -->
+                ${booking.qrCodes && booking.qrCodes.length > 0
+                  ? booking.qrCodes.map((qr, index) => `
+                      <div style="display: inline-block; background: #ffffff; border: 2px dashed #3b82f6; padding: 16px; margin: 10px; border-radius: 12px; max-width: 240px; text-align: center;">
+                        <span style="font-size: 12px; font-weight: bold; color: #4b5563; display: block; margin-bottom: 8px;">TICKET ${index + 1} OF ${booking.quantity}</span>
+                        <img src="${qr.qrDataUrl}" alt="Gate Access QR Code" style="width: 180px; height: 180px; display: block; margin: 0 auto;" />
+                        <span style="font-family: monospace; font-size: 11px; color: #9ca3af; display: block; margin-top: 8px;">ID: ${qr.ticketToken.slice(0, 8).toUpperCase()}...</span>
+                      </div>
+                    `).join('')
+                  : `<p style="color: #dc2626;">⚠️ QR Codes missing. Please contact gate support immediately.</p>`
+                }
+              </div>
+              <hr style="margin: 24px 0; border: 0; border-top: 1px solid #eee;" />
             `
           )
           .join('')}
       </div>
 
+      <!-- Critical Entry Instructions -->
       <div style="padding: 16px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">
-        <p style="font-size: 15px; color: #7c3aed; font-weight: bold;">
-          📌 Important Entry Instructions
+        <p style="font-size: 15px; color: #7c3aed; font-weight: bold; margin-top: 0;">
+          📌 Important Security & Entry Rules
         </p>
-        <ul style="font-size: 14px; color: #333; padding-left: 20px; margin-top: 8px;">
-          <li>This email serves as your <strong>official entry ticket</strong> to <strong>${eventTitle}</strong>.</li>
-          <li><span style="color: red;"><strong>No printed tickets or screenshots</strong></span> will be accepted at the gate.</li>
-          <li>Please display this email on your phone during entry.</li>
-          <li>Your booking ID and personal information will be verified.</li>
+        <ul style="font-size: 14px; color: #333; padding-left: 20px; margin-top: 8px; line-height: 1.4;">
+          <li>Each QR code displayed above represents exactly <strong>one individual admission</strong>.</li>
+          <li>Once scanned at the gate checkpoint, that specific QR code is <strong>deactivated instantly</strong> in our system.</li>
+          <li>Do not share copies or screenshots of these graphics to prevent unauthorized usage.</li>
+          <li>Ensure your mobile screen brightness is turned up to full when presenting code to the scanner.</li>
         </ul>
       </div>
 
       <p style="font-size: 15px; margin-top: 24px; color: #374151;">
-        🕒 Arrive early to avoid delays and bring your national ID matching the booking.
+        🕒 Set up your schedule early to beat entry queues and carry your national ID matching your order configuration.
       </p>
 
       <p style="font-size: 15px; margin-top: 12px; color: #4b5563;">
-        For event schedule, venue details, and more information, visit our official site:<br/>
+        For maps, directions, and scheduling context, head over to our main platform portal:<br/>
         <a href="https://ticketstream-events.netlify.app" style="color: #3b82f6; text-decoration: underline;" target="_blank">
           ticketstream-events.netlify.app
         </a>
       </p>
 
       <p style="font-size: 15px; margin-top: 16px; color: #4b5563;">
-        Need help? Contact us at <a href="mailto:support@madollar.com" style="color: #3b82f6;">support@madollar.com</a>
+        Need technical assistance? Drop a line to <a href="mailto:support@madollar.com" style="color: #3b82f6;">support@madollar.com</a>
       </p>
 
       <div style="text-align: center; margin-top: 32px;">
