@@ -1,13 +1,13 @@
 ### =========================================================================
 ### Environment Configuration Variables
 ### =========================================================================
-@baseUrl = http://localhost:5000/api
+@baseUrl = https://ticketstream-dmamgjd7hcdeeecn.southafricanorth-01.azurewebsites.net/api
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjozMDQxMTQ3MTYsInVzZXJFbWFpbCI6ImFudGhvbnltYWluYTEwMTFAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiZmlyc3ROYW1lIjoibWFkb2xsYXIiLCJleHAiOjE3ODQ3MDczMzcsImlhdCI6MTc3OTUyMzMzN30.8lBx0MW4c_C3IZoito1AcgYtRf4gMOrG01C07JexOOw
 @userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MDU1NDg2OTYsInVzZXJFbWFpbCI6ImNvZGV3aXRoZ2FrZW55ZUBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImZpcnN0TmFtZSI6Ikdha2VueWUgIiwiZXhwIjoxNzg1MzIyNTE2LCJpYXQiOjE3ODAxMzg1MTZ9.O3oGbHS4JV20d4Hj36_Ne78isPd3VDk4iP9DsNC_BwQ
 ### Replace these mock values with real data references from your Postgres tables
 @sampleNationalId = 405548696
 @sampleEventId = 31
-@sampleBookingId = 105
+@sampleBookingId = 1050
 @sampleGeneratedToken = fa4755de-9614-4720-b2e5-e0b700874b03
 
 
