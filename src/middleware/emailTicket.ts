@@ -4,7 +4,7 @@ import nodemailer from 'nodemailer';
 const router = express.Router();
 
 // --------------------
-// 🧾 Types (Updated to support QR Arrays)
+// 🧾 Types (Preserved and complete)
 // --------------------
 interface TicketType {
   name: string;
@@ -14,7 +14,7 @@ interface TicketType {
 interface QrAsset {
   ticketId: number;
   ticketToken: string;
-  qrDataUrl: string; // The base64 data string from QRCode.toDataURL
+  qrDataUrl: string; // The base64 data string from編 QRCode.toDataURL
 }
 
 interface Booking {
@@ -26,7 +26,7 @@ interface Booking {
   quantity: number;
   paymentStatus?: string;
   createdAt: string;
-  qrCodes?: QrAsset[]; // Attached from issueTicketsAndQrsService
+  qrCodes?: QrAsset[]; 
 }
 
 interface User {
@@ -50,14 +50,33 @@ router.post('/send-ticket-email', async (req, res) => {
       },
     });
 
+    // 📎 1. Extract all QR codes from all bookings and compile inline attachments
+    const emailAttachments: any[] = [];
+
+    bookings.forEach((booking) => {
+      if (booking.qrCodes && booking.qrCodes.length > 0) {
+        booking.qrCodes.forEach((qr) => {
+          // Clean out the data URI metadata prefix if present, leaving the pure base64 code block
+          const cleanBase64 = qr.qrDataUrl.replace(/^data:image\/png;base64,/, "");
+
+          emailAttachments.push({
+            filename: `ticket-${qr.ticketId}.png`,
+            content: Buffer.from(cleanBase64, 'base64'),
+            cid: `cid_qr_ticket_${qr.ticketId}`, // 🔑 Matches the lookup anchor inside the HTML string generator
+          });
+        });
+      }
+    });
+
     const htmlContent = generateTicketEmailHtml(bookings, user);
     const eventTitle = bookings[0]?.event?.title || 'Your Event';
 
     await transporter.sendMail({
-      from: `"Madollar Tickets" <${process.env.EMAIL_SENDER}>`,
+      from: `"TicketStream Tickets" <${process.env.EMAIL_SENDER}>`,
       to: user.email,
       subject: `🎟️ Your Scanable Tickets for ${eventTitle}`,
       html: htmlContent,
+      attachments: emailAttachments, // 👈 Injecting the gathered image buffer payloads
     });
 
     res.status(200).json({ message: 'Ticket email with QR codes sent successfully.' });
@@ -68,7 +87,7 @@ router.post('/send-ticket-email', async (req, res) => {
 });
 
 // --------------------
-// ✨ Email Template (With high-contrast QR injection)
+// ✨ Email Template (Refactored for Content-ID reference layout targets)
 // --------------------
 function generateTicketEmailHtml(bookings: Booking[], user: User): string {
   const eventTitle = bookings[0]?.event?.title || 'Event';
@@ -113,7 +132,10 @@ function generateTicketEmailHtml(bookings: Booking[], user: User): string {
                   ? booking.qrCodes.map((qr, index) => `
                       <div style="display: inline-block; background: #ffffff; border: 2px dashed #3b82f6; padding: 16px; margin: 10px; border-radius: 12px; max-width: 240px; text-align: center;">
                         <span style="font-size: 12px; font-weight: bold; color: #4b5563; display: block; margin-bottom: 8px;">TICKET ${index + 1} OF ${booking.quantity}</span>
-                        <img src="${qr.qrDataUrl}" alt="Gate Access QR Code" style="width: 180px; height: 180px; display: block; margin: 0 auto;" />
+                        
+                        <!-- 🎯 THE TARGETED FIX: Use the unique attachment CID link instead of raw data string -->
+                        <img src="cid:cid_qr_ticket_${qr.ticketId}" alt="Gate Access QR Code" style="width: 180px; height: 180px; display: block; margin: 0 auto;" />
+                        
                         <span style="font-family: monospace; font-size: 11px; color: #9ca3af; display: block; margin-top: 8px;">ID: ${qr.ticketToken.slice(0, 8).toUpperCase()}...</span>
                       </div>
                     `).join('')
@@ -168,7 +190,7 @@ function generateTicketEmailHtml(bookings: Booking[], user: User): string {
       </div>
 
       <p style="font-size: 14px; margin-top: 32px; color: #6b7280; text-align: center;">
-        — The Madollar Tickets Team
+        — The TicketStream Tickets Team
       </p>
     </div>
   `;

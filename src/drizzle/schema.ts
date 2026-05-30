@@ -264,7 +264,8 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
     references: [ticketTypes.ticketTypeId],
   }),
   payments: many(payments),
-  tickets: many(tickets), // Added: A single booking can generate multiple individual QR tickets
+  // 🎯 ENSURE THIS LINE SAYS 'tickets' AND NOT 'qrCodes'
+  tickets: many(tickets), 
 }));
 
 export const paymentsRelations = relations(payments, ({ one }) => ({

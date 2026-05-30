@@ -39,13 +39,25 @@ Content-Type: application/json
 GET http://localhost:5000/api/payments
 
 ###
+
 POST http://localhost:5000/api/auth/login
 Content-Type: application/json
 
 {
    "email": "codewithgakenye@gmail.com",
-    "password":"12345678"
+   "password":"12345678"
 }
+
+###
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+   "email": "codewithgakenye@gmail.com",
+   "password": "12345678"
+}
+
 ###
 POST http://localhost:5000/api/bookings
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MTQyNjk0OCwiZW1haWwiOiJicmF5b2dha2VueWUwN0BnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImZpcnN0TmFtZSI6IkdBS0VOWUUxMjMiLCJsYXN0TmFtZSI6Ik5ESVJJVFUiLCJjb250YWN0UGhvbmUiOiIrMjU0MTIzNDU2NzgiLCJhZGRyZXNzIjoiNTAgTnllcmkiLCJleHAiOjE3NTIyNDQ3MTAsImlhdCI6MTc1MjI0MTExMH0.JoOd3GE-FBUIEQMhsq1XHGM61FhfNM3PLDRo1Sf8FRY
@@ -224,7 +236,7 @@ Content-Type: application/json
 {
   
   "email": "codewithgakenye1@gmail.com",
-  "password": "password3" 
+  "password": "password123" 
 }
 
 # Create a new user

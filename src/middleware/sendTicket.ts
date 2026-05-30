@@ -19,15 +19,15 @@ export interface TicketInfo {
   total: number;
   paymentStatus: "Completed" | "Pending" | "Failed" | "Confirmed"; // Matches your Enum states safely
   bookingDate: Date;
-  qrCodes?: QrCodeAsset[]; // 👈 Made optional with '?' to satisfy separate testing files safely
+  tickets?: QrCodeAsset[]; // 🎯 Maps dynamically from your single object or array entries
 }
 
 export const sendTicket = async (ticket: TicketInfo): Promise<boolean> => {
   try {
     const subject = `🎟 Your Ticket for ${ticket.eventName} is Confirmed`;
     
-    // Fallback to an empty array dynamically if no assets are passed by testing drivers
-    const activeQrCodes = ticket.qrCodes || [];
+    // Fallback or fallback wrapper configuration to accept single or collection schemas cleanly
+    const activeQrCodes = ticket.tickets || [];
 
     // 1. Generate text-only details for the plain text fallback version
     const plainQrTicketsText = activeQrCodes
@@ -56,7 +56,7 @@ ${activeQrCodes.length > 0 ? plainQrTicketsText : "No QR passes generated for th
           <h3 style="margin-top: 0; color: #2c3e50; font-size: 16px;">Gate Pass ${idx + 1} of ${ticket.quantity}</h3>
           <p style="font-size: 13px; color: #555555; margin: 4px 0;"><strong>Ticket ID:</strong> #${t.ticketId}</p>
           
-          <!-- Renders the Base64 QR code instantly inside standard mail clients -->
+          <!-- Renders your Base64 PNG data string instantly inside standard mail clients -->
           <img src="${t.qrDataUrl}" alt="Gate Pass QR Scan" style="width: 220px; height: 220px; margin: 15px auto; display: block;" />
           
           <p style="font-size: 11px; color: #777777; font-family: monospace; word-break: break-all; margin: 5px 0 0 0;">
