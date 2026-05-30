@@ -117,3 +117,41 @@ export const fetchUserActiveTicketsService = async (nationalId: number) => {
     .where(eq(tickets.nationalId, nationalId))
     .orderBy(tickets.createdAt);
 };
+
+/**
+ * Counts scanned vs unscanned tickets for a specific event or user.
+ */
+export const getTicketStatsService = async (eventId: number) => {
+  const allTickets = await db
+    .select({
+      isScanned: tickets.isScanned,
+    })
+    .from(tickets)
+    .where(eq(tickets.eventId, eventId));
+
+  const total = allTickets.length;
+  const scanned = allTickets.filter((t) => t.isScanned).length;
+  const unscanned = total - scanned;
+
+  return {
+    total,
+    scanned,
+    unscanned,
+  };
+};
+
+/**
+ * Returns the completion percentage of an event's attendance.
+ */
+export const getScanProgressService = async (eventId: number) => {
+  const allTickets = await db
+    .select({ isScanned: tickets.isScanned })
+    .from(tickets)
+    .where(eq(tickets.eventId, eventId));
+
+  const total = allTickets.length;
+  if (total === 0) return 0; // Avoid division by zero
+
+  const scanned = allTickets.filter((t) => t.isScanned).length;
+  return (scanned / total) * 100;
+};
