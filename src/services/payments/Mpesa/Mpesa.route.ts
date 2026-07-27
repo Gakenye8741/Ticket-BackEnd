@@ -1,30 +1,35 @@
-import { Router } from "express";
-import { webhookHandler as stripeWebhook } from "../payment.webhook";
+import { Router, raw } from "express";
 import { 
   handleStkPush, 
-  mpesaCallbackHandler 
-} from "./Mpesa.controller"; // Ensure the path matches your project structure
+  mpesaCallbackHandler, 
+  stripeWebhookHandler,
+  createStripeCheckoutSession
+} from "./Mpesa.controller";
 
 const router = Router();
 
 /**
  * STRIPE ROUTES
  */
-// Note: Stripe webhooks usually require the raw body for signature verification.
-// If you're using a global json() parser, you might need a middleware exception here.
-router.post("/stripe-webhook", stripeWebhook);
+// CRITICAL: Stripe requires the raw body buffer to verify signatures securely.
+// Using raw({ type: "application/json" }) ensures express doesn't parse it prematurely.
+router.post(
+  "/stripe-webhook", 
+  raw({ type: "application/json" }), 
+  stripeWebhookHandler
+);
+
+// Create Stripe Checkout Session route
+router.post("/stripe/create-checkout-session", createStripeCheckoutSession);
 
 /**
  * M-PESA ROUTES
  */
 
 // 1. Initiate the STK Push prompt on the user's phone
-// URL: /api/v1/payments/mpesa/stk-push
 router.post("/mpesa/stk-push", handleStkPush);
 
 // 2. The Callback URL that Safaricom hits after user enters PIN
-// URL: /api/v1/payments/mpesa-callback
-// This must match the CallBackURL set in your Mpesa.service.ts
 router.post("/mpesa-callback", mpesaCallbackHandler);
 
 export default router;

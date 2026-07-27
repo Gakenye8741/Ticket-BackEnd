@@ -159,7 +159,7 @@ GET http://localhost:5000/api/details/venues/search?name=g
 DELETE http://localhost:5000/api/venues/4ererw
 
 ###
-GET http://localhost:5000/api/events
+GET http://localhost:5000/api/events/5
 
 ###
 POST  http://localhost:5000/api/events

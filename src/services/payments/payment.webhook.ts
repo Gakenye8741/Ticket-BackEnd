@@ -33,6 +33,8 @@ export const webhookHandler = async (req: Request, res: Response): Promise<void>
   let event: Stripe.Event;
 
   try {
+    // ⚠️ FIX: Stripe requires the RAW body (buffer), not parsed JSON.
+    // Ensure you use express.raw({ type: "application/json" }) in your main server configuration for this route.
     event = stripe.webhooks.constructEvent(req.body, sig!, endpointSecret);
   } catch (err: any) {
     console.error("⚠️ Stripe webhook verification failed:", err.message);
@@ -40,6 +42,8 @@ export const webhookHandler = async (req: Request, res: Response): Promise<void>
     return;
   }
 
+  // ⚠️ FIX: Acknowledge receipt back to Stripe early/safely if background tasks take time,
+  // or wrap your main logic properly so unhandled errors don't hang Stripe's request.
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
 
@@ -84,9 +88,9 @@ export const webhookHandler = async (req: Request, res: Response): Promise<void>
           return;
         }
 
-        const [event] = await db.select().from(events).where(eq(events.eventId, booking.eventId));
+        const [eventRecord] = await db.select().from(events).where(eq(events.eventId, booking.eventId));
 
-        if (!user || !event || !booking) {
+        if (!user || !eventRecord || !booking) {
           console.error("❌ Required user/event/booking not found");
           res.status(500).json({ error: "Incomplete data for ticket" });
           return;
@@ -109,7 +113,7 @@ export const webhookHandler = async (req: Request, res: Response): Promise<void>
           firstName: user.firstName,
           lastName: user.lastName,
           nationalId: user.nationalId,
-          eventName: event.title,
+          eventName: eventRecord.title,
           ticketType: booking.ticketTypeName,
           quantity: booking.quantity,
           price: Number(booking.totalAmount) / booking.quantity,

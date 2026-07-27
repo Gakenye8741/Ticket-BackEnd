@@ -4,7 +4,9 @@ import {
   markTicketAsScannedService, 
   fetchUserActiveTicketsService,
   issueTicketsAndQrsService,
-  generateQrCodeDataUrl
+  generateQrCodeDataUrl,
+  getTicketStatsService,
+  getScanProgressService
 } from "./qrcode.service"; // 👈 Maps smoothly to your unified service file
 
 /**
@@ -154,5 +156,44 @@ export const manualIssueTickets = async (req: Request, res: Response): Promise<v
   } catch (error: any) {
     console.error("❌ Ticket manual processing failure:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * 📊 4. Event Statistics Controller
+ * GET /api/v1/tickets/stats/:eventId
+ * * Provides real-time attendance data: Total issued, current check-ins, 
+ * and percentage of completion for the event.
+ */
+
+export const getEventTicketStatistics = async (req: Request, res: Response): Promise<void> => {
+  // Normalize the parameter to a single string
+  const rawEventId = req.params.eventId;
+  const eventId = Array.isArray(rawEventId) ? rawEventId[0] : rawEventId;
+  
+  const targetEventId = parseInt(eventId, 10);
+
+  if (isNaN(targetEventId)) {
+    res.status(400).json({ error: "Invalid event ID format provided." });
+    return;
+  }
+
+  try {
+    // A. Fetch both stats and progress concurrently for speed
+    const [stats, percentage] = await Promise.all([
+      getTicketStatsService(targetEventId),
+      getScanProgressService(targetEventId)
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...stats,
+        percentageCompleted: parseFloat(percentage.toFixed(2)) // Clean 2-decimal format
+      }
+    });
+  } catch (error: any) {
+    console.error("❌ Stats compilation fault:", error);
+    res.status(500).json({ error: "Failed to retrieve event attendance statistics." });
   }
 };
