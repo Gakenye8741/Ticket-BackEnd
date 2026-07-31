@@ -1,7 +1,9 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendNotificationEmail = async (
   email: string,
@@ -11,54 +13,38 @@ export const sendNotificationEmail = async (
   html?: string
 ): Promise<boolean> => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_SENDER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+    const defaultHtml = `
+      <div style="font-family: Arial, sans-serif;">
+        <p>Hello ${firstName ?? "User"},</p>
+        <p>${message}</p>
+      </div>
+    `;
 
-    const mailOptions = {
-      from: `"Ticket Stream" <${process.env.EMAIL_SENDER}>`,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: `Ticket Stream <${process.env.EMAIL_SENDER}>`,
+      to: [email],
+      // Add replyTo to redirect any incoming replies away from your active inbox
+      replyTo: "no-reply@gakenye-ndiritu.co.ke",
       subject,
       text: message,
-      html: html
-        ? html
-        : `
-        <div style="font-family: Arial, sans-serif;">
-          <p>Hello ${firstName ?? "User"},</p>
-          <p>${message}</p>
-        </div>
-      `,
-    };
+      html: html ? html : defaultHtml,
+    });
 
-    const mailResponse = await transporter.sendMail(mailOptions);
-
-    if (mailResponse.accepted.length > 0) {
-      console.log(
-        `[MAILER SUCCESS] Email accepted by SMTP server for ${email}`
-      );
-      return true;
-    }
-
-    if (mailResponse.rejected.length > 0) {
+    if (error) {
       console.error(
-        `[MAILER FAILURE] Email rejected by SMTP server for ${email}`,
-        mailResponse.rejected
+        `[MAILER FAILURE] Failed to send email to ${email}`,
+        error
       );
       return false;
     }
 
-    console.error(
-      `[MAILER ERROR] Unknown SMTP response for ${email}`,
-      mailResponse
+    console.log(
+      `[MAILER SUCCESS] Email sent successfully to ${email}. ID: ${data?.id}`
     );
-    return false;
+    return true;
   } catch (error) {
     console.error(
-      `[MAILER EXCEPTION] Failed to send email to ${email}`,
+      `[MAILER EXCEPTION] Unexpected error sending email to ${email}`,
       error
     );
     return false;

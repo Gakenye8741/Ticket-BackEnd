@@ -1,36 +1,35 @@
-import { sendTicket, TicketInfo } from "./sendTicket";
+import { sendNotificationEmail } from "./googleMailer"; // Update path as needed
 
 const runEmailTest = async (): Promise<void> => {
-  console.log("🚀 Initializing mock parameters...");
+  console.log("🚀 Initializing mock parameters for email testing...");
 
-  const mockTicketPayload: TicketInfo = {
-    email: "codingguru8741@gmail.com",
-    firstName: "Test",
-    lastName: "User",
-    nationalId: 123456783,
-    eventName: "Color Fest 2026",
-    ticketType: "VIP Access",
-    quantity: 2,
-    price: 1500.00,
-    total: 3000.00,
-    paymentStatus: "Completed",
-    bookingDate: new Date(),
-    qrCodes: [
-      {
-        ticketId: 1001,
-        ticketToken: "TK-MADOLLAR-VIP-99x7B8",
-        qrDataUrl: "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TK-MADOLLAR-VIP-99x7B8&color=2c3e50"
-      },
-      {
-        ticketId: 1002,
-        ticketToken: "TK-MADOLLAR-VIP-44k2Z1",
-        qrDataUrl: "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=TK-MADOLLAR-VIP-44k2Z1&color=2c3e50"
-      }
-    ],
-  };
+  const testEmail = "codingguru8741@gmail.com";
+  const testSubject = "Your Color Fest 2026 Ticket Confirmation";
+  const testFirstName = "Test";
+  const testMessage = "Thank you for purchasing your VIP Access ticket for Color Fest 2026. Your payment of KES 3,000.00 has been successfully processed.";
+  
+  // Optional custom HTML if you want to test custom templates
+  const testHtml = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+      <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+        <h2 style="color: #2c3e50;">Color Fest 2026 Ticket Confirmed!</h2>
+        <p>Hello <strong>${testFirstName}</strong>,</p>
+        <p>${testMessage}</p>
+        <hr style="border: none; border-top: 1px solid #eee;" />
+        <p style="font-size: 12px; color: #888;">Powered by Ticket Stream & Resend</p>
+      </div>
+    </div>
+  `;
 
-  const isSuccess = await sendTicket(mockTicketPayload);
-  console.log(isSuccess ? "✨ [SUCCESS] Email sent!" : "❌ [FAILURE] Failed.");
+  const isSuccess = await sendNotificationEmail(
+    testEmail,
+    testSubject,
+    testFirstName,
+    testMessage,
+    testHtml
+  );
+
+  console.log(isSuccess ? "✨ [SUCCESS] Test email sent!" : "❌ [FAILURE] Failed to send test email.");
 };
 
 runEmailTest();
