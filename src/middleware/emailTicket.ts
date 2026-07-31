@@ -1,57 +1,58 @@
-import express from 'express';
-import nodemailer from 'nodemailer';
+import express, { Request, Response } from "express";
+import { Resend } from "resend";
 
 const router = express.Router();
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 // --------------------
-// 📤 Route to Send Email
+// 📤 Route to Send Email via Resend
 // --------------------
-router.post('/send-ticket-email', async (req, res) => {
+router.post("/send-ticket-email", async (req: Request, res: Response): Promise<void> => {
   const { bookings, user } = req.body;
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_SENDER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
-
     const emailAttachments: any[] = [];
 
-    // 1. Prepare attachments with unique CIDs
+    // 1. Prepare attachments for Resend
     bookings.forEach((booking: any) => {
       if (booking.qrCodes && booking.qrCodes.length > 0) {
         booking.qrCodes.forEach((qr: any) => {
           // Remove potential data URI prefix to get clean base64
-          const base64Data = qr.qrDataUrl.split(';base64,').pop();
-          
+          const base64Data = qr.qrDataUrl.split(";base64,").pop();
+
           emailAttachments.push({
             filename: `ticket-${qr.ticketId}.png`,
-            content: Buffer.from(base64Data, 'base64'),
-            encoding: 'base64',
-            cid: `qr_ticket_${qr.ticketId}`, // Simplified CID
+            content: Buffer.from(base64Data, "base64"),
+            // Resend attachments take 'filename' and 'content' as a Buffer/string
           });
         });
       }
     });
 
     const htmlContent = generateTicketEmailHtml(bookings, user);
-    const eventTitle = bookings[0]?.event?.title || 'Your Event';
+    const eventTitle = bookings[0]?.event?.title || "Your Event";
 
-    await transporter.sendMail({
-      from: `"TicketStream Tickets" <${process.env.EMAIL_SENDER}>`,
-      to: user.email,
+    // 2. Send via Resend API
+    const { data, error } = await resend.emails.send({
+      from: `TicketStream <${process.env.EMAIL_SENDER}>`,
+      to: [user.email],
       subject: `🎟️ Your Scanable Tickets for ${eventTitle}`,
       html: htmlContent,
       attachments: emailAttachments,
     });
 
-    res.status(200).json({ message: 'Ticket email with QR codes sent successfully.' });
-  } catch (error) {
-    console.error('Error sending ticket email:', error);
-    res.status(500).json({ message: 'Failed to send ticket email.' });
+    if (error) {
+      console.error("❌ Resend API Error:", error);
+      res.status(400).json({ message: "Failed to send ticket email.", error });
+      return;
+    }
+
+    console.log(`📨 Ticket email sent successfully via Resend. ID: ${data?.id}`);
+    res.status(200).json({ message: "Ticket email with QR codes sent successfully.", data });
+  } catch (error: any) {
+    console.error("❌ Error sending ticket email:", error);
+    res.status(500).json({ message: "Failed to send ticket email.", error: error.message });
   }
 });
 
@@ -59,7 +60,7 @@ router.post('/send-ticket-email', async (req, res) => {
 // ✨ Email Template
 // --------------------
 function generateTicketEmailHtml(bookings: any[], user: any): string {
-  const eventTitle = bookings[0]?.event?.title || 'Event';
+  const eventTitle = bookings[0]?.event?.title || "Event";
 
   return `
     <div style="font-family: Arial, sans-serif; max-width: 640px; margin: auto; padding: 24px; background-color: #f9f9f9; border-radius: 10px; border: 1px solid #ddd;">
@@ -84,12 +85,11 @@ function generateTicketEmailHtml(bookings: any[], user: any): string {
             ${booking.qrCodes?.map((qr: any, index: number) => `
               <div style="display: inline-block; border: 2px dashed #3b82f6; padding: 10px; margin: 5px; border-radius: 8px;">
                 <p style="font-size: 10px;">TICKET ${index + 1}</p>
-                <!-- 🎯 MUST MATCH CID: qr_ticket_ID -->
-                <img src="cid:qr_ticket_${qr.ticketId}" style="width: 150px; height: 150px;" />
+                <img src="${qr.qrDataUrl}" style="width: 150px; height: 150px;" />
               </div>
-            `).join('')}
+            `).join("")}
           </div>
-        `).join('')}
+        `).join("")}
       </div>
 
       <p style="margin-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">— The TicketStream Team</p>
