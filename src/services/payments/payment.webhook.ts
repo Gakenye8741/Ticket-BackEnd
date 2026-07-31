@@ -147,3 +147,6 @@ export const stripeWebhookHandler = async (req: Request, res: Response): Promise
 
   res.status(200).json({ received: true });
 };
+
+// Exported alias matching your route and server imports
+export const webhookHandler = stripeWebhookHandler;
