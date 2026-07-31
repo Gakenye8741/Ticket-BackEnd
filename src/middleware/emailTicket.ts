@@ -18,26 +18,26 @@ router.post("/send-ticket-email", async (req: Request, res: Response): Promise<v
     bookings.forEach((booking: any) => {
       if (booking.qrCodes && booking.qrCodes.length > 0) {
         booking.qrCodes.forEach((qr: any) => {
-          // Remove potential data URI prefix to get clean base64
-          const base64Data = qr.qrDataUrl.split(";base64,").pop();
-
-          emailAttachments.push({
-            filename: `ticket-${qr.ticketId}.png`,
-            content: Buffer.from(base64Data, "base64"),
-            // Resend attachments take 'filename' and 'content' as a Buffer/string
-          });
+          const qrData = qr.qrDataUrl || qr.qrCodeUrl || qr.url;
+          if (qrData) {
+            const base64Data = qrData.split(";base64,").pop();
+            emailAttachments.push({
+              filename: `ticket-${qr.ticketId || qr.id || 'pass'}.png`,
+              content: Buffer.from(base64Data, "base64"),
+            });
+          }
         });
       }
     });
 
     const htmlContent = generateTicketEmailHtml(bookings, user);
-    const eventTitle = bookings[0]?.event?.title || "Your Event";
+    const eventTitle = bookings[0]?.event?.title || bookings[0]?.eventName || "Laikipia Tech Summit 2026";
 
     // 2. Send via Resend API
     const { data, error } = await resend.emails.send({
       from: `TicketStream <${process.env.EMAIL_SENDER}>`,
       to: [user.email],
-      subject: `🎟️ Your Scanable Tickets for ${eventTitle}`,
+      subject: `🎟️ Your Verified Entry Passes for ${eventTitle}`,
       html: htmlContent,
       attachments: emailAttachments,
     });
@@ -57,42 +57,113 @@ router.post("/send-ticket-email", async (req: Request, res: Response): Promise<v
 });
 
 // --------------------
-// ✨ Email Template
+// ✨ Clean & Professional Email Template
 // --------------------
 function generateTicketEmailHtml(bookings: any[], user: any): string {
-  const eventTitle = bookings[0]?.event?.title || "Event";
+  const eventTitle = bookings[0]?.event?.title || bookings[0]?.eventName || "Laikipia Tech Summit 2026";
+  const venue = bookings[0]?.event?.venue || "Laikipia University Grounds, Nyahururu";
 
   return `
-    <div style="font-family: Arial, sans-serif; max-width: 640px; margin: auto; padding: 24px; background-color: #f9f9f9; border-radius: 10px; border: 1px solid #ddd;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 640px; margin: auto; padding: 30px; background-color: #f4f5f7; border-radius: 16px; color: #1f2937;">
       
+      <!-- Header Banner -->
       <div style="text-align: center; margin-bottom: 24px;">
-        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&h=250&q=80" alt="Event" style="width: 100%; border-radius: 12px;" />
+        <h2 style="margin: 0; color: #2563eb; font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px;">TicketStream Tickets</h2>
+        <p style="margin: 4px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; font-weight: bold;">Official Verified Booking Receipt</p>
       </div>
 
-      <h2 style="color: #1f2937;">Hello ${user.firstName} ${user.lastName},</h2>
-      <p style="font-size: 16px; color: #374151;">Your payment has been cleared! 🎉 Below are your entry passes.</p>
-      
-      <h1 style="color: #3b82f6;">${eventTitle}</h1>
+      <!-- Main Container Card -->
+      <div style="background: #ffffff; padding: 28px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+        
+        <h1 style="color: #111827; font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 8px;">${eventTitle}</h1>
+        <p style="font-size: 14px; color: #4b5563; margin-top: 0; margin-bottom: 20px;">Hello <strong>${user.firstName} ${user.lastName}</strong>, your payment has been successfully cleared! 🎉 Below are your entry passes.</p>
 
-      <div style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
-        ${bookings.map((booking) => `
-          <h3 style="color: #2563eb;">🧾 Booking #${booking.bookingId}</h3>
-          <p><strong>Tier:</strong> ${booking.ticketType?.name}</p>
-          <p><strong>Quantity:</strong> ${booking.quantity}</p>
-          
-          <div style="text-align: center; margin-top: 20px;">
-            <p><strong>👇 PRESENT QR CODE(S) AT CHECKPOINT 👇</strong></p>
-            ${booking.qrCodes?.map((qr: any, index: number) => `
-              <div style="display: inline-block; border: 2px dashed #3b82f6; padding: 10px; margin: 5px; border-radius: 8px;">
-                <p style="font-size: 10px;">TICKET ${index + 1}</p>
-                <img src="${qr.qrDataUrl}" style="width: 150px; height: 150px;" />
+        <!-- Attendee & Profile Box -->
+        <div style="background: #f8fafc; padding: 14px 18px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; font-size: 13px; color: #334155;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 4px 0; color: #64748b;">National ID:</td>
+              <td style="padding: 4px 0; font-weight: 600; text-align: right;">${user.nationalId || user.national_id || "N/A"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #64748b;">Email Address:</td>
+              <td style="padding: 4px 0; font-weight: 600; text-align: right;">${user.email}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0; color: #64748b;">Event Venue:</td>
+              <td style="padding: 4px 0; font-weight: 600; text-align: right;">${venue}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Bookings & Itemized Breakdown -->
+        ${bookings.map((booking) => {
+          const totalAmount = booking.totalAmount || (booking.price * booking.quantity) || 1;
+          const unitPrice = booking.price || (totalAmount / booking.quantity) || 1;
+          const ticketTier = booking.ticketType?.name || booking.ticketTypeName || "Standard Pass";
+
+          return `
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 14px; font-weight: 800; color: #2563eb;">BOOKING REF: #${booking.bookingId}</span>
+                <span style="background: #dbeafe; color: #1e40af; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px;">CONFIRMED</span>
               </div>
-            `).join("")}
-          </div>
-        `).join("")}
+
+              <table style="width: 100%; font-size: 13px; color: #374151; margin-bottom: 16px;">
+                <tr>
+                  <td style="padding: 3px 0;">Ticket Tier / Category:</td>
+                  <td style="padding: 3px 0; font-weight: 600; text-align: right;">${ticketTier}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 3px 0;">Quantity Purchased:</td>
+                  <td style="padding: 3px 0; font-weight: 600; text-align: right;">${booking.quantity} Unit(s)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 3px 0;">Price Per Unit:</td>
+                  <td style="padding: 3px 0; font-weight: 600; text-align: right;">KSH ${unitPrice}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; border-top: 1px dashed #e5e7eb; font-weight: bold;">Total Amount Cleared:</td>
+                  <td style="padding: 6px 0; border-top: 1px dashed #e5e7eb; font-weight: 900; color: #16a34a; text-align: right;">KSH ${totalAmount}</td>
+                </tr>
+              </table>
+
+              <!-- QR Codes Grid Section -->
+              <div style="background: #f8fafc; border: 2px dashed #cbd5e1; padding: 16px; border-radius: 10px; text-align: center; margin-top: 15px;">
+                <p style="font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px;">👇 Present QR Code(s) at Gate Checkpoint 👇</p>
+                
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+                  ${booking.qrCodes?.map((qr: any, index: number) => {
+                    const qrSrc = qr.qrDataUrl || qr.qrCodeUrl || qr.url;
+                    const ticketId = qr.ticketId || qr.id || `#${index + 1}`;
+                    const tokenHash = qr.ticketToken || qr.token || "N/A";
+
+                    return `
+                      <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; width: 160px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <p style="font-size: 10px; font-weight: bold; color: #64748b; margin: 0 0 4px 0;">VALID TICKET #${ticketId}</p>
+                        ${qrSrc ? `<img src="${qrSrc}" style="width: 130px; height: 130px; display: block; margin: auto; border-radius: 4px;" />` : `<p style="color: red; font-size: 11px;">QR Unavailable</p>`}
+                        <p style="font-size: 9px; color: #94a3b8; margin: 6px 0 0 0; word-break: break-all;">Token: ${tokenHash.substring(0, 8)}...</p>
+                        <p style="font-size: 9px; font-weight: bold; color: #475569; margin: 2px 0 0 0;">Holder ID: ${user.nationalId}</p>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+
+            </div>
+          `;
+        }).join("")}
+
       </div>
 
-      <p style="margin-top: 20px; font-size: 14px; color: #6b7280; text-align: center;">— The TicketStream Team</p>
+      <!-- Footer Notice -->
+      <div style="text-align: center; margin-top: 24px;">
+        <p style="font-size: 12px; color: #6b7280; line-height: 1.5; margin: 0;">
+          Present this digital pass or printed copy along with your National ID at the gate for validation.<br/>
+          <strong>— The TicketStream Team</strong>
+        </p>
+      </div>
+
     </div>
   `;
 }
