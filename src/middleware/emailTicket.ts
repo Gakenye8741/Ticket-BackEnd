@@ -14,18 +14,14 @@ router.post("/send-ticket-email", async (req: Request, res: Response): Promise<v
   try {
     const emailAttachments: any[] = [];
 
-    // 1. Prepare attachments for Resend
-    bookings.forEach((booking: any) => {
-      if (booking.qrCodes && booking.qrCodes.length > 0) {
-        booking.qrCodes.forEach((qr: any) => {
-          const qrData = qr.qrDataUrl || qr.qrCodeUrl || qr.url;
-          if (qrData) {
-            const base64Data = qrData.split(";base64,").pop();
-            emailAttachments.push({
-              filename: `ticket-${qr.ticketId || qr.id || 'pass'}.png`,
-              content: Buffer.from(base64Data, "base64"),
-            });
-          }
+    // 1. Prepare attachments directly from the individual passes/tickets array
+    bookings.forEach((item: any) => {
+      const qrData = item.qrDataUrl || item.qrCodeUrl || item.url;
+      if (qrData) {
+        const base64Data = qrData.split(";base64,").pop();
+        emailAttachments.push({
+          filename: `ticket-${item.ticketId || 'pass'}.png`,
+          content: Buffer.from(base64Data, "base64"),
         });
       }
     });
@@ -59,9 +55,9 @@ router.post("/send-ticket-email", async (req: Request, res: Response): Promise<v
 // --------------------
 // ✨ Clean & Professional Email Template
 // --------------------
-function generateTicketEmailHtml(bookings: any[], user: any): string {
-  const eventTitle = bookings[0]?.event?.title || bookings[0]?.eventName || "Laikipia Tech Summit 2026";
-  const venue = bookings[0]?.event?.venue || "Laikipia University Grounds, Nyahururu";
+function generateTicketEmailHtml(passes: any[], user: any): string {
+  const eventTitle = passes[0]?.event?.title || passes[0]?.eventName || "Laikipia Tech Summit 2026";
+  const venue = passes[0]?.event?.venue || "Laikipia University Grounds, Nyahururu";
 
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 640px; margin: auto; padding: 30px; background-color: #f4f5f7; border-radius: 16px; color: #1f2937;">
@@ -83,7 +79,7 @@ function generateTicketEmailHtml(bookings: any[], user: any): string {
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 4px 0; color: #64748b;">National ID:</td>
-              <td style="padding: 4px 0; font-weight: 600; text-align: right;">${user.nationalId || user.national_id || "N/A"}</td>
+              <td style="padding: 4px 0; font-weight: 600; text-align: right;">${user.nationalId || "N/A"}</td>
             </tr>
             <tr>
               <td style="padding: 4px 0; color: #64748b;">Email Address:</td>
@@ -96,63 +92,29 @@ function generateTicketEmailHtml(bookings: any[], user: any): string {
           </table>
         </div>
 
-        <!-- Bookings & Itemized Breakdown -->
-        ${bookings.map((booking) => {
-          const totalAmount = booking.totalAmount || (booking.price * booking.quantity) || 1;
-          const unitPrice = booking.price || (totalAmount / booking.quantity) || 1;
-          const ticketTier = booking.ticketType?.name || booking.ticketTypeName || "Standard Pass";
+        <!-- QR Codes Grid Section mapping directly over the passes array -->
+        <div style="background: #f8fafc; border: 2px dashed #cbd5e1; padding: 16px; border-radius: 10px; text-align: center;">
+          <p style="font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px;">👇 Present QR Code(s) at Gate Checkpoint 👇</p>
+          
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+            ${passes.map((pass: any, index: number) => {
+              const qrSrc = pass.qrDataUrl || pass.qrCodeUrl || pass.url;
+              const ticketId = pass.ticketId || `#${index + 1}`;
+              const tokenHash = pass.ticketToken || "N/A";
+              const bookingRef = pass.bookingId || "N/A";
 
-          return `
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 20px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="font-size: 14px; font-weight: 800; color: #2563eb;">BOOKING REF: #${booking.bookingId}</span>
-                <span style="background: #dbeafe; color: #1e40af; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px;">CONFIRMED</span>
-              </div>
-
-              <table style="width: 100%; font-size: 13px; color: #374151; margin-bottom: 16px;">
-                <tr>
-                  <td style="padding: 3px 0;">Ticket Tier / Category:</td>
-                  <td style="padding: 3px 0; font-weight: 600; text-align: right;">${ticketTier}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 3px 0;">Quantity Purchased:</td>
-                  <td style="padding: 3px 0; font-weight: 600; text-align: right;">${booking.quantity} Unit(s)</td>
-                </tr>
-                <tr>
-                  <td style="padding: 3px 0;">Price Per Unit:</td>
-                  <td style="padding: 3px 0; font-weight: 600; text-align: right;">KSH ${unitPrice}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; border-top: 1px dashed #e5e7eb; font-weight: bold;">Total Amount Cleared:</td>
-                  <td style="padding: 6px 0; border-top: 1px dashed #e5e7eb; font-weight: 900; color: #16a34a; text-align: right;">KSH ${totalAmount}</td>
-                </tr>
-              </table>
-
-              <!-- QR Codes Grid Section -->
-              <div style="background: #f8fafc; border: 2px dashed #cbd5e1; padding: 16px; border-radius: 10px; text-align: center; margin-top: 15px;">
-                <p style="font-size: 11px; font-weight: 900; color: #475569; text-transform: uppercase; margin: 0 0 12px 0; letter-spacing: 0.5px;">👇 Present QR Code(s) at Gate Checkpoint 👇</p>
-                
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
-                  ${booking.qrCodes?.map((qr: any, index: number) => {
-                    const qrSrc = qr.qrDataUrl || qr.qrCodeUrl || qr.url;
-                    const ticketId = qr.ticketId || qr.id || `#${index + 1}`;
-                    const tokenHash = qr.ticketToken || qr.token || "N/A";
-
-                    return `
-                      <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; width: 160px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                        <p style="font-size: 10px; font-weight: bold; color: #64748b; margin: 0 0 4px 0;">VALID TICKET #${ticketId}</p>
-                        ${qrSrc ? `<img src="${qrSrc}" style="width: 130px; height: 130px; display: block; margin: auto; border-radius: 4px;" />` : `<p style="color: red; font-size: 11px;">QR Unavailable</p>`}
-                        <p style="font-size: 9px; color: #94a3b8; margin: 6px 0 0 0; word-break: break-all;">Token: ${tokenHash.substring(0, 8)}...</p>
-                        <p style="font-size: 9px; font-weight: bold; color: #475569; margin: 2px 0 0 0;">Holder ID: ${user.nationalId}</p>
-                      </div>
-                    `;
-                  }).join("")}
+              return `
+                <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; width: 160px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                  <p style="font-size: 10px; font-weight: bold; color: #2563eb; margin: 0 0 2px 0;">BOOKING #${bookingRef}</p>
+                  <p style="font-size: 9px; font-weight: bold; color: #64748b; margin: 0 0 6px 0;">TICKET #${ticketId}</p>
+                  ${qrSrc ? `<img src="cid:ticket-${pass.ticketId || 'pass'}.png" style="width: 130px; height: 130px; display: block; margin: auto; border-radius: 4px;" />` : `<p style="color: red; font-size: 11px;">QR Unavailable</p>`}
+                  <p style="font-size: 8px; color: #94a3b8; margin: 6px 0 0 0; word-break: break-all;">Token: ${typeof tokenHash === "string" ? tokenHash.substring(0, 8) + "..." : "N/A"}</p>
+                  <p style="font-size: 9px; font-weight: bold; color: #475569; margin: 2px 0 0 0;">Holder ID: ${user.nationalId}</p>
                 </div>
-              </div>
-
-            </div>
-          `;
-        }).join("")}
+              `;
+            }).join("")}
+          </div>
+        </div>
 
       </div>
 
