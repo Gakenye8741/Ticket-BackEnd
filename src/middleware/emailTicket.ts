@@ -72,7 +72,7 @@ function generateTicketEmailHtml(passes: any[], user: any): string {
       <div style="background: #ffffff; padding: 28px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         
         <h1 style="color: #111827; font-size: 20px; font-weight: 800; margin-top: 0; margin-bottom: 8px;">${eventTitle}</h1>
-        <p style="font-size: 14px; color: #4b5563; margin-top: 0; margin-bottom: 20px;">Hello <strong>${user.firstName} ${user.lastName}</strong>, your payment has been successfully cleared! 🎉 Below are your entry passes.</p>
+        <p style="font-size: 14px; color: #4b5563; margin-top: 0; margin-bottom: 20px;">Hello <strong>${user.firstName} ${user.lastName} </strong>, your payment has been successfully cleared! 🎉 Below are your entry passes.</p>
 
         <!-- Attendee & Profile Box -->
         <div style="background: #f8fafc; padding: 14px 18px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; font-size: 13px; color: #334155;">
@@ -89,6 +89,7 @@ function generateTicketEmailHtml(passes: any[], user: any): string {
               <td style="padding: 4px 0; color: #64748b;">Event Venue:</td>
               <td style="padding: 4px 0; font-weight: 600; text-align: right;">${venue}</td>
             </tr>
+            
           </table>
         </div>
 

@@ -126,8 +126,6 @@ export const bookings = pgTable("bookings", {
 // PAYMENTS
 // =======================
 
-// drizzle/schema.ts
-
 export const payments = pgTable("payments", {
   paymentId: serial("paymentId").primaryKey(),
   bookingId: integer("bookingId")

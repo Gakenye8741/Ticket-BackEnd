@@ -1,10 +1,10 @@
 ### =========================================================================
 ### Environment Configuration Variables
 ### =========================================================================
-# @baseUrl = https://ticketstream-dmamgjd7hcdeeecn.southafricanorth-01.azurewebsites.net/api
-@baseUrl =  http://localhost:5000/api
+@baseUrl = https://ticket-backend-ufx5.onrender.com/api
+# @baseUrl =  http://localhost:5000/api
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjozMDQxMTQ3MTYsInVzZXJFbWFpbCI6ImFudGhvbnltYWluYTEwMTFAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiZmlyc3ROYW1lIjoibWFkb2xsYXIiLCJleHAiOjE3ODQ3MDczMzcsImlhdCI6MTc3OTUyMzMzN30.8lBx0MW4c_C3IZoito1AcgYtRf4gMOrG01C07JexOOw
-@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MDU1NDg2OTYsInVzZXJFbWFpbCI6ImNvZGV3aXRoZ2FrZW55ZUBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImZpcnN0TmFtZSI6Ikdha2VueWUgIiwiZXhwIjoxNzg1MzIyNTE2LCJpYXQiOjE3ODAxMzg1MTZ9.O3oGbHS4JV20d4Hj36_Ne78isPd3VDk4iP9DsNC_BwQ
+@userToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYXRpb25hbElkIjo0MDU1NDg2OTYsInVzZXJFbWFpbCI6ImNvZGV3aXRoZ2FrZW55ZUBnbWFpbC5jb20iLCJyb2xlIjoidXNlciIsImZpcnN0TmFtZSI6Ikdha2VueWUiLCJleHAiOjE3OTA3MjIzNzYsImlhdCI6MTc4NTUzODM3Nn0.hfKRl-4ZcNt2PqxThUv2DVFw-BdFMBEhhcxQ8zh2ZQo
 @sampleNationalId = 405548696
 @sampleEventId = 31
 @sampleBookingId = 1050
